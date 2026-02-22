@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英単語スペリングクイズ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            text-align: center;
+            color: #667eea;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* スタート画面 */
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-select {
+            margin: 30px 0;
+        }
+
+        .difficulty-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            margin: 15px 0;
+            font-size: 20px;
+            font-weight: bold;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* スコアボード */
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .mute-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+
+        .mute-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* タイマー */
+        .timer-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer.warning {
+            color: #ff6b6b;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 問題エリア */
+        .question-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .meaning {
+            font-size: 42px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .meaning.urgent {
+            animation: scaleUp 10s linear forwards;
+            background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);
+        }
+
+        @keyframes scaleUp {
+            0% { 
+                font-size: 42px;
+                transform: scale(1);
+            }
+            100% { 
+                font-size: 72px;
+                transform: scale(1.2);
+            }
+        }
+
+        .hint {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* 入力エリア */
+        .input-area {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .letter-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px;
+            outline: none;
+        }
+
+        .letter-box {
+            width: 45px;
+            height: 55px;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            background: white;
+            transition: all 0.2s;
+            text-transform: lowercase;
+        }
+
+        .letter-box.active {
+            border-color: #764ba2;
+            background: #f0f0ff;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+            transform: scale(1.1);
+        }
+
+        .letter-box.filled {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border-color: #667eea;
+        }
+
+        .letter-box.correct {
+            background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+            border-color: #22c55e;
+            animation: bounce 0.3s;
+        }
+
+        .letter-box.incorrect {
+            background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+            border-color: #ef4444;
+            animation: shake 0.3s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        #answer-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 28px;
+            text-align: center;
+            border: 4px solid #667eea;
+            border-radius: 15px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        #answer-input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+            transform: scale(1.02);
+        }
+
+        /* ボタンエリア */
+        .button-area {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .skip-btn {
+            background: #ddd;
+            color: #666;
+        }
+
+        .skip-btn:hover:not(:disabled) {
+            background: #ccc;
+            transform: translateY(-2px);
+        }
+
+        .skip-btn:disabled {
+            background: #e0e0e0;
+            color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #skip-count {
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        /* 結果表示 */
+        .result {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.correct {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            display: block;
+        }
+
+        .result.incorrect {
+            background: linear-gradient(135deg, #d63031 0%, #ff7675 100%);
+            color: white;
+            display: block;
+        }
+
+        .correct-answer {
+            font-size: 20px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* ゲームオーバー画面 */
+        .game-over {
+            display: none;
+            text-align: center;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .game-over h2 {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 56px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .rank-display {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+
+        .stats {
+            background: #f5f7fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+
+        .restart-btn, .home-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            width: 100%;
+            margin: 10px 0;
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        .restart-btn:hover, .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.5);
+        }
+
+        .home-btn {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+        }
+
+        .back-home-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-home-btn {
+            background: #95a5a6;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-home-btn:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        /* 非表示クラス */
+        .hidden {
+            display: none !important;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .meaning {
+                font-size: 32px;
+                padding: 20px;
+            }
+
+            .meaning.urgent {
+                animation: scaleUpMobile 10s linear forwards;
+            }
+
+            @keyframes scaleUpMobile {
+                0% { 
+                    font-size: 32px;
+                    transform: scale(1);
+                }
+                100% { 
+                    font-size: 52px;
+                    transform: scale(1.15);
+                }
+            }
+
+            .letter-box {
+                width: 35px;
+                height: 45px;
+                font-size: 22px;
+                gap: 5px;
+            }
+            
+            #answer-input {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="title">🎮 英単語スペリングクイズ</div>
+        <div class="subtitle">漢字でGO!風 - 日本語から英単語を入力しよう！</div>
+
+        <!-- スタート画面 -->
+        <div id="start-screen" class="start-screen">
+            <h2>難易度を選択してください</h2>
+            <div class="difficulty-select">
+                <button class="difficulty-btn" onclick="startGame('easy')">
+                    😊 かんたん<br><small>基本的な単語・制限時間20秒</small>
+                </button>
+                <button class="difficulty-btn" onclick="startGame('normal')">
+                    🎯 ふつう<br><small>一般的な単語・制限時間20秒</small>
+                </button>
+                <button class="difficulty-btn" onclick="startGame('hard')">
+                    🔥 むずかしい<br><small>難しい単語・制限時間20秒</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game-area" class="hidden">
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">問題</div>
+                    <div class="score-value" id="question-count">1/10</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">正解</div>
+                    <div class="score-value" id="correct-count">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">スコア</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="score-item">
+                    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">🔊</button>
+                </div>
+            </div>
+
+            <div class="timer-container">
+                <div class="timer" id="timer">30</div>
+            </div>
+
+            <div class="question-area">
+                <div class="question-number">第<span id="current-question">1</span>問</div>
+                <div class="meaning" id="meaning">準備中...</div>
+                <div class="hint" id="hint"></div>
+            </div>
+
+            <div class="result" id="result"></div>
+
+            <div class="input-area">
+                <div id="letter-boxes" class="letter-boxes"></div>
+                <input type="text" id="answer-input" style="position: absolute; left: -9999px;" autocomplete="off">
+            </div>
+
+            <div class="button-area">
+                <button class="submit-btn" id="submit-btn">回答する</button>
+                <button class="skip-btn" id="skip-btn">スキップ <span id="skip-count">(残り1回)</span></button>
+            </div>
+
+            <div class="back-home-container">
+                <button class="back-home-btn" id="back-home-game-btn">🏠 ホームに戻る</button>
+            </div>
+        </div>
+
+        <!-- ゲームオーバー画面 -->
+        <div id="game-over" class="game-over">
+            <h2>ゲーム終了！</h2>
+            <div class="rank-display" id="rank-display"></div>
+            <div class="final-score" id="final-score">0 / 10</div>
+            
+            <div class="stats">
+                <div class="stats-item">
+                    <span>正解率</span>
+                    <strong id="accuracy">0%</strong>
+                </div>
+                <div class="stats-item">
+                    <span>獲得スコア</span>
+                    <strong id="total-score">0点</strong>
+                </div>
+                <div class="stats-item">
+                    <span>難易度</span>
+                    <strong id="difficulty-display">-</strong>
+                </div>
+            </div>
+
+            <button class="restart-btn" id="restart-btn">もう一度プレイ</button>
+            <button class="home-btn" id="home-btn">難易度選択に戻る</button>
+        </div>
+    </div>
+
+    <script>
+        // 問題データ
+        const questionBank = {
+            easy: [
+                { meaning: "美しい", answer: "beautiful", hint: "9文字" },
+                { meaning: "幸せな", answer: "happy", hint: "5文字" },
+                { meaning: "大きい", answer: "big", hint: "3文字" },
+                { meaning: "小さい", answer: "small", hint: "5文字" },
+                { meaning: "新しい", answer: "new", hint: "3文字" },
+                { meaning: "古い", answer: "old", hint: "3文字" },
+                { meaning: "速い", answer: "fast", hint: "4文字" },
+                { meaning: "遅い", answer: "slow", hint: "4文字" },
+                { meaning: "良い", answer: "good", hint: "4文字" },
+                { meaning: "悪い", answer: "bad", hint: "3文字" },
+                { meaning: "暑い", answer: "hot", hint: "3文字" },
+                { meaning: "寒い", answer: "cold", hint: "4文字" },
+                { meaning: "友達", answer: "friend", hint: "6文字" },
+                { meaning: "学校", answer: "school", hint: "6文字" },
+                { meaning: "本", answer: "book", hint: "4文字" },
+            ],
+            normal: [
+                { meaning: "重要な", answer: "important", hint: "9文字" },
+                { meaning: "難しい", answer: "difficult", hint: "9文字" },
+                { meaning: "興味深い", answer: "interesting", hint: "11文字" },
+                { meaning: "必要な", answer: "necessary", hint: "9文字" },
+                { meaning: "可能な", answer: "possible", hint: "8文字" },
+                { meaning: "環境", answer: "environment", hint: "11文字" },
+                { meaning: "経験", answer: "experience", hint: "10文字" },
+                { meaning: "知識", answer: "knowledge", hint: "9文字" },
+                { meaning: "機会", answer: "opportunity", hint: "11文字" },
+                { meaning: "成功", answer: "success", hint: "7文字" },
+                { meaning: "挑戦", answer: "challenge", hint: "9文字" },
+                { meaning: "創造的な", answer: "creative", hint: "8文字" },
+                { meaning: "効果的な", answer: "effective", hint: "9文字" },
+                { meaning: "影響", answer: "influence", hint: "9文字" },
+                { meaning: "情報", answer: "information", hint: "11文字" },
+            ],
+            hard: [
+                { meaning: "責任", answer: "responsibility", hint: "14文字" },
+                { meaning: "コミュニケーション", answer: "communication", hint: "13文字" },
+                { meaning: "想像力", answer: "imagination", hint: "11文字" },
+                { meaning: "達成", answer: "achievement", hint: "11文字" },
+                { meaning: "一貫性", answer: "consistency", hint: "11文字" },
+                { meaning: "独立", answer: "independence", hint: "12文字" },
+                { meaning: "批判的", answer: "controversial", hint: "13文字" },
+                { meaning: "現象", answer: "phenomenon", hint: "10文字" },
+                { meaning: "哲学", answer: "philosophy", hint: "10文字" },
+                { meaning: "心理学", answer: "psychology", hint: "10文字" },
+                { meaning: "建築", answer: "architecture", hint: "12文字" },
+                { meaning: "起業家", answer: "entrepreneur", hint: "12文字" },
+                { meaning: "洗練された", answer: "sophisticated", hint: "13文字" },
+                { meaning: "同時に", answer: "simultaneously", hint: "14文字" },
+                { meaning: "矛盾", answer: "contradiction", hint: "13文字" },
+            ]
+        };
+
+        // ゲーム変数
+        let currentDifficulty = 'normal';
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let totalScore = 0;
+        let gameQuestions = [];
+        let timer = null;
+        let timeLeft = 20;
+        let timeLimit = 20;
+        let answeredQuestions = [];
+        let currentAnswer = '';
+        let currentCursorPos = 0;
+        let skipsRemaining = 1;
+
+        // 音声関連
+        let audioContext = null;
+        let bgmGainNode = null;
+        let bgmOscillators = [];
+        let isMuted = false;
+
+        // AudioContextの初期化
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                bgmGainNode = audioContext.createGain();
+                bgmGainNode.gain.value = 0.15;
+                bgmGainNode.connect(audioContext.destination);
+            }
+        }
+
+        // BGM再生
+        function playBGM() {
+            initAudio();
+            stopBGM();
+
+            // シンプルなメロディ（明るい雰囲気）
+            const melody = [
+                { freq: 523.25, start: 0, duration: 0.3 },    // C5
+                { freq: 659.25, start: 0.3, duration: 0.3 },  // E5
+                { freq: 783.99, start: 0.6, duration: 0.3 },  // G5
+                { freq: 659.25, start: 0.9, duration: 0.3 },  // E5
+                { freq: 523.25, start: 1.2, duration: 0.4 },  // C5
+            ];
+
+            const now = audioContext.currentTime;
+            
+            melody.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.value = note.freq;
+                
+                gainNode.gain.setValueAtTime(0, now + note.start);
+                gainNode.gain.linearRampToValueAtTime(0.3, now + note.start + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(bgmGainNode);
+                
+                osc.start(now + note.start);
+                osc.stop(now + note.start + note.duration);
+                
+                bgmOscillators.push(osc);
+            });
+
+            // ループ再生
+            setTimeout(() => {
+                if (bgmOscillators.length > 0) {
+                    playBGM();
+                }
+            }, 1600);
+        }
+
+        // BGM停止
+        function stopBGM() {
+            bgmOscillators.forEach(osc => {
+                try {
+                    osc.stop();
+                } catch(e) {}
+            });
+            bgmOscillators = [];
+        }
+
+        // 焦燥感のある効果音（10秒切った時）
+        function playUrgentSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            
+            // 不安な和音
+            [440, 554.37, 659.25].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.15, now + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.5);
+            });
+        }
+
+        // 正解音
+        function playCorrectSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                gainNode.gain.setValueAtTime(0, now + i * 0.1);
+                gainNode.gain.linearRampToValueAtTime(0.2, now + i * 0.1 + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.3);
+            });
+        }
+
+        // 不正解音
+        function playIncorrectSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.2, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        // カウントダウン音（残り5秒以下）
+        function playTickSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            osc.type = 'square';
+            osc.frequency.value = 880;
+            
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        // ミュート切り替え
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteBtn = document.getElementById('mute-btn');
+            
+            if (isMuted) {
+                muteBtn.textContent = '🔇';
+                stopBGM();
+                if (audioContext) {
+                    audioContext.suspend();
+                }
+            } else {
+                muteBtn.textContent = '🔊';
+                if (audioContext) {
+                    audioContext.resume();
+                }
+                if (document.getElementById('game-area').classList.contains('hidden') === false) {
+                    playBGM();
+                }
+            }
+        }
+
+        // ホームに戻る（確認ダイアログ付き）
+        function goBackHome() {
+            if (confirm('ゲームを中断してホームに戻りますか？\n現在のスコアは保存されません。')) {
+                if (timer) clearInterval(timer);
+                stopBGM();
+                
+                document.getElementById('game-area').classList.add('hidden');
+                document.getElementById('game-over').classList.remove('show');
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+        }
+
+        // 文字ボックスを生成
+        function createLetterBoxes(length) {
+            const container = document.getElementById('letter-boxes');
+            container.innerHTML = '';
+            currentAnswer = '';
+            currentCursorPos = 0;
+            
+            for (let i = 0; i < length; i++) {
+                const box = document.createElement('div');
+                box.className = 'letter-box';
+                box.id = `letter-box-${i}`;
+                container.appendChild(box);
+            }
+            
+            // 最初のボックスをアクティブに
+            if (length > 0) {
+                document.getElementById('letter-box-0').classList.add('active');
+            }
+        }
+
+        // 文字ボックスを更新
+        function updateLetterBoxes() {
+            const answerLength = gameQuestions[currentQuestionIndex].answer.length;
+            
+            for (let i = 0; i < answerLength; i++) {
+                const box = document.getElementById(`letter-box-${i}`);
+                if (i < currentAnswer.length) {
+                    box.textContent = currentAnswer[i];
+                    box.classList.add('filled');
+                    box.classList.remove('active');
+                } else {
+                    box.textContent = '';
+                    box.classList.remove('filled');
+                    box.classList.remove('active');
+                }
+            }
+            
+            // 現在のカーソル位置をアクティブに
+            if (currentAnswer.length < answerLength) {
+                document.getElementById(`letter-box-${currentAnswer.length}`).classList.add('active');
+            }
+        }
+
+        // キー入力処理
+        function handleKeyInput(e) {
+            const answerLength = gameQuestions[currentQuestionIndex].answer.length;
+            
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                if (currentAnswer.length > 0) {
+                    currentAnswer = currentAnswer.slice(0, -1);
+                    updateLetterBoxes();
+                }
+            } else if (e.key === 'Enter') {
+                if (currentAnswer.length === answerLength && !document.getElementById('submit-btn').disabled) {
+                    checkAnswer();
+                }
+            } else if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+                e.preventDefault();
+                if (currentAnswer.length < answerLength) {
+                    currentAnswer += e.key.toLowerCase();
+                    updateLetterBoxes();
+                    
+                    // 全部入力したら自動的に回答
+                    if (currentAnswer.length === answerLength) {
+                        setTimeout(() => {
+                            if (!document.getElementById('submit-btn').disabled) {
+                                checkAnswer();
+                            }
+                        }, 300);
+                    }
+                }
+            }
+        }
+
+        // ユーティリティ関数
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function getRank(score, total) {
+            const percentage = (score / total) * 100;
+            if (percentage === 100) return '🏆 パーフェクト！';
+            if (percentage >= 80) return '🥇 素晴らしい！';
+            if (percentage >= 60) return '🥈 良くできました！';
+            if (percentage >= 40) return '🥉 もう少し！';
+            return '💪 頑張りましょう！';
+        }
+
+        // ゲーム開始
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            currentQuestionIndex = 0;
+            correctCount = 0;
+            totalScore = 0;
+            answeredQuestions = [];
+            skipsRemaining = 1;
+
+            // 音声初期化とBGM開始
+            initAudio();
+            playBGM();
+
+            // 難易度に応じた設定（全て20秒に統一）
+            timeLimit = 20;
+
+            // 問題をシャッフルして10問選択
+            gameQuestions = shuffleArray(questionBank[difficulty]).slice(0, 10);
+
+            // 画面切り替え
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            document.getElementById('game-over').classList.remove('show');
+
+            updateScoreBoard();
+            loadQuestion();
+        }
+
+        // スコアボード更新
+        function updateScoreBoard() {
+            document.getElementById('question-count').textContent = `${currentQuestionIndex + 1}/10`;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('score').textContent = totalScore;
+        }
+
+        // タイマー開始
+        function startTimer() {
+            if (timer) clearInterval(timer);
+            
+            timeLeft = timeLimit;
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('timer').classList.remove('warning');
+            document.getElementById('meaning').classList.remove('urgent');
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+
+                if (timeLeft === 10) {
+                    document.getElementById('meaning').classList.add('urgent');
+                    playUrgentSound();
+                }
+
+                if (timeLeft <= 5 && timeLeft > 0) {
+                    document.getElementById('timer').classList.add('warning');
+                    playTickSound();
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        // 時間切れ
+        function timeUp() {
+            const resultDiv = document.getElementById('result');
+            const correctAnswer = gameQuestions[currentQuestionIndex].answer;
+            const answerLength = correctAnswer.length;
+            
+            resultDiv.className = 'result incorrect';
+            resultDiv.innerHTML = `⏰ 時間切れ！ゲーム終了<br><span class="correct-answer">正解: ${correctAnswer}</span>`;
+            
+            document.getElementById('answer-input').disabled = true;
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('skip-btn').disabled = true;
+
+            // 正解を文字ボックスに表示
+            for (let i = 0; i < answerLength; i++) {
+                const box = document.getElementById(`letter-box-${i}`);
+                box.classList.add('incorrect');
+                box.textContent = correctAnswer[i];
+            }
+
+            playIncorrectSound();
+
+            answeredQuestions.push({
+                question: gameQuestions[currentQuestionIndex].meaning,
+                userAnswer: '',
+                correctAnswer: correctAnswer,
+                isCorrect: false,
+                isTimeout: true
+            });
+
+            // 時間切れの場合は即座にゲーム終了
+            setTimeout(() => {
+                endGame();
+            }, 2500);
+        }
+
+        // 問題読み込み
+        function loadQuestion() {
+            const question = gameQuestions[currentQuestionIndex];
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('meaning').textContent = question.meaning;
+            document.getElementById('meaning').classList.remove('urgent');
+            document.getElementById('hint').textContent = `ヒント: ${question.hint}`;
+            
+            // 文字ボックスを生成
+            createLetterBoxes(question.answer.length);
+            
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').disabled = false;
+            document.getElementById('submit-btn').disabled = false;
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('result').className = 'result';
+
+            // スキップボタンの状態を更新
+            const skipBtn = document.getElementById('skip-btn');
+            const skipCount = document.getElementById('skip-count');
+            if (skipsRemaining > 0) {
+                skipBtn.disabled = false;
+                skipCount.textContent = `(残り${skipsRemaining}回)`;
+            } else {
+                skipBtn.disabled = true;
+                skipCount.textContent = '(使用済み)';
+            }
+
+            // キーボードフォーカスを設定
+            document.getElementById('letter-boxes').focus();
+
+            startTimer();
+        }
+
+        // 回答チェック
+        function checkAnswer() {
+            if (timer) clearInterval(timer);
+
+            const userAnswer = currentAnswer.trim().toLowerCase();
+            const correctAnswer = gameQuestions[currentQuestionIndex].answer.toLowerCase();
+            const resultDiv = document.getElementById('result');
+            const answerLength = correctAnswer.length;
+
+            let isCorrect = false;
+            let points = 0;
+
+            if (userAnswer === correctAnswer) {
+                isCorrect = true;
+                correctCount++;
+                
+                // 残り時間に応じてボーナスポイント
+                points = 10 + Math.floor(timeLeft / 2);
+                totalScore += points;
+                
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = `🎉 正解！ +${points}点`;
+                
+                // 全ての文字ボックスを正解表示
+                for (let i = 0; i < answerLength; i++) {
+                    document.getElementById(`letter-box-${i}`).classList.add('correct');
+                }
+                
+                playCorrectSound();
+
+                document.getElementById('answer-input').disabled = true;
+                document.getElementById('submit-btn').disabled = true;
+
+                answeredQuestions.push({
+                    question: gameQuestions[currentQuestionIndex].meaning,
+                    userAnswer: userAnswer,
+                    correctAnswer: correctAnswer,
+                    isCorrect: isCorrect,
+                    points: points
+                });
+
+                updateScoreBoard();
+
+                setTimeout(() => {
+                    nextQuestion();
+                }, 2000);
+            } else {
+                // 不正解の場合は入力をクリアして再挑戦可能
+                resultDiv.className = 'result incorrect';
+                resultDiv.innerHTML = `❌ 不正解！もう一度入力してください`;
+                
+                // 文字ボックスを一時的に赤く表示
+                for (let i = 0; i < answerLength; i++) {
+                    const box = document.getElementById(`letter-box-${i}`);
+                    box.classList.add('incorrect');
+                }
+                
+                playIncorrectSound();
+
+                // 1秒後に入力をクリアして再挑戦
+                setTimeout(() => {
+                    currentAnswer = '';
+                    updateLetterBoxes();
+                    
+                    // incorrect クラスを削除
+                    for (let i = 0; i < answerLength; i++) {
+                        document.getElementById(`letter-box-${i}`).classList.remove('incorrect');
+                    }
+                    
+                    resultDiv.style.display = 'none';
+                    
+                    // タイマーを再開
+                    startTimer();
+                }, 1000);
+            }
+        }
+
+        // スキップ
+        function skipQuestion() {
+            if (skipsRemaining <= 0) {
+                return;
+            }
+
+            if (timer) clearInterval(timer);
+
+            skipsRemaining--;
+
+            const resultDiv = document.getElementById('result');
+            const correctAnswer = gameQuestions[currentQuestionIndex].answer;
+            const answerLength = correctAnswer.length;
+            
+            resultDiv.className = 'result incorrect';
+            resultDiv.innerHTML = `スキップ<br><span class="correct-answer">正解: ${correctAnswer}</span>`;
+
+            document.getElementById('answer-input').disabled = true;
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('skip-btn').disabled = true;
+
+            // 正解を文字ボックスに表示
+            for (let i = 0; i < answerLength; i++) {
+                const box = document.getElementById(`letter-box-${i}`);
+                box.classList.add('incorrect');
+                box.textContent = correctAnswer[i];
+            }
+
+            answeredQuestions.push({
+                question: gameQuestions[currentQuestionIndex].meaning,
+                userAnswer: 'スキップ',
+                correctAnswer: correctAnswer,
+                isCorrect: false,
+                isSkipped: true
+            });
+
+            setTimeout(() => {
+                nextQuestion();
+            }, 2000);
+        }
+
+        // 次の問題へ
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < 10) {
+                loadQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        // ゲーム終了
+        function endGame() {
+            if (timer) clearInterval(timer);
+            stopBGM();
+
+            document.getElementById('game-area').classList.add('hidden');
+            document.getElementById('game-over').classList.add('show');
+            
+            // 実際に解答した問題数
+            const totalQuestions = answeredQuestions.length;
+            const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+            
+            document.getElementById('final-score').textContent = `${correctCount} / ${totalQuestions} 正解`;
+            document.getElementById('rank-display').textContent = getRank(correctCount, totalQuestions);
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            document.getElementById('total-score').textContent = `${totalScore}点`;
+            
+            const difficultyNames = {
+                easy: 'かんたん',
+                normal: 'ふつう',
+                hard: 'むずかしい'
+            };
+            document.getElementById('difficulty-display').textContent = difficultyNames[currentDifficulty];
+
+            // LocalStorageにベストスコアを保存
+            const bestKey = `best_${currentDifficulty}`;
+            const currentBest = localStorage.getItem(bestKey) || 0;
+            if (totalScore > currentBest) {
+                localStorage.setItem(bestKey, totalScore);
+            }
+        }
+
+        // イベントリスナー
+        document.getElementById('submit-btn').addEventListener('click', checkAnswer);
+        document.getElementById('skip-btn').addEventListener('click', skipQuestion);
+        
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            startGame(currentDifficulty);
+        });
+
+        document.getElementById('home-btn').addEventListener('click', () => {
+            document.getElementById('game-over').classList.remove('show');
+            document.getElementById('start-screen').classList.remove('hidden');
+        });
+
+        document.getElementById('back-home-game-btn').addEventListener('click', goBackHome);
+
+        // キーボード入力を処理
+        document.addEventListener('keydown', (e) => {
+            // ゲーム画面が表示されている時のみ処理
+            if (!document.getElementById('game-area').classList.contains('hidden')) {
+                handleKeyInput(e);
+            }
+        });
+    </script>
+</body>
+</html>
