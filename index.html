@@ -240,6 +240,13 @@
             border-color: #667eea;
         }
 
+        .letter-box.hint-letter {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+            color: #92400e;
+            font-weight: bold;
+        }
+
         .letter-box.correct {
             background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
             border-color: #22c55e;
@@ -431,6 +438,81 @@
             border-bottom: none;
         }
 
+        .word-results {
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .correct-words-section,
+        .incorrect-words-section {
+            margin-bottom: 25px;
+        }
+
+        .correct-words-section h3 {
+            color: #00b894;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00b894;
+        }
+
+        .incorrect-words-section h3 {
+            color: #d63031;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d63031;
+        }
+
+        .word-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .word-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .word-item.correct {
+            border-left-color: #00b894;
+            background: linear-gradient(90deg, #e8f5f1 0%, #f8f9fa 100%);
+        }
+
+        .word-item.incorrect {
+            border-left-color: #d63031;
+            background: linear-gradient(90deg, #ffe8e8 0%, #f8f9fa 100%);
+        }
+
+        .word-meaning {
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .word-english {
+            font-size: 18px;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .word-item.incorrect .word-english {
+            color: #d63031;
+        }
+
+        .no-words {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
         .restart-btn, .home-btn {
             background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
             color: white;
@@ -514,6 +596,18 @@
             #answer-input {
                 font-size: 24px;
             }
+
+            .word-results {
+                max-height: 300px;
+            }
+
+            .word-meaning {
+                font-size: 14px;
+            }
+
+            .word-english {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -527,13 +621,13 @@
             <h2>難易度を選択してください</h2>
             <div class="difficulty-select">
                 <button class="difficulty-btn" onclick="startGame('easy')">
-                    😊 かんたん<br><small>基本的な単語・制限時間20秒</small>
+                    😊 かんたん<br><small>英検3級レベル・制限時間20秒</small>
                 </button>
                 <button class="difficulty-btn" onclick="startGame('normal')">
-                    🎯 ふつう<br><small>一般的な単語・制限時間20秒</small>
+                    🎯 ふつう<br><small>英検2級レベル・制限時間20秒</small>
                 </button>
                 <button class="difficulty-btn" onclick="startGame('hard')">
-                    🔥 むずかしい<br><small>難しい単語・制限時間20秒</small>
+                    🔥 むずかしい<br><small>英検1級レベル・制限時間20秒</small>
                 </button>
             </div>
         </div>
@@ -593,16 +687,19 @@
             
             <div class="stats">
                 <div class="stats-item">
-                    <span>正解率</span>
-                    <strong id="accuracy">0%</strong>
-                </div>
-                <div class="stats-item">
-                    <span>獲得スコア</span>
-                    <strong id="total-score">0点</strong>
-                </div>
-                <div class="stats-item">
                     <span>難易度</span>
                     <strong id="difficulty-display">-</strong>
+                </div>
+            </div>
+
+            <div class="word-results">
+                <div class="correct-words-section">
+                    <h3>✅ 正解した単語</h3>
+                    <div id="correct-words-list" class="word-list"></div>
+                </div>
+                <div class="incorrect-words-section">
+                    <h3>❌ 間違えた単語</h3>
+                    <div id="incorrect-words-list" class="word-list"></div>
                 </div>
             </div>
 
@@ -612,58 +709,398 @@
     </div>
 
     <script>
-        // 問題データ
+        // 問題データ（英検レベル別・大幅拡張版）
         const questionBank = {
+            // 英検3級レベル（約350語）
             easy: [
+                // 基本形容詞・副詞
                 { meaning: "美しい", answer: "beautiful", hint: "9文字" },
-                { meaning: "幸せな", answer: "happy", hint: "5文字" },
-                { meaning: "大きい", answer: "big", hint: "3文字" },
-                { meaning: "小さい", answer: "small", hint: "5文字" },
-                { meaning: "新しい", answer: "new", hint: "3文字" },
-                { meaning: "古い", answer: "old", hint: "3文字" },
+                { meaning: "重要な", answer: "important", hint: "9文字" },
+                { meaning: "興味深い", answer: "interesting", hint: "11文字" },
+                { meaning: "人気のある", answer: "popular", hint: "7文字" },
+                { meaning: "便利な", answer: "convenient", hint: "10文字" },
+                { meaning: "有名な", answer: "famous", hint: "6文字" },
+                { meaning: "健康な", answer: "healthy", hint: "7文字" },
+                { meaning: "特別な", answer: "special", hint: "7文字" },
+                { meaning: "完璧な", answer: "perfect", hint: "7文字" },
+                { meaning: "自然な", answer: "natural", hint: "7文字" },
+                { meaning: "安全な", answer: "safe", hint: "4文字" },
+                { meaning: "危険な", answer: "dangerous", hint: "9文字" },
+                { meaning: "静かな", answer: "quiet", hint: "5文字" },
+                { meaning: "うるさい", answer: "noisy", hint: "5文字" },
+                { meaning: "簡単な", answer: "easy", hint: "4文字" },
+                { meaning: "難しい", answer: "difficult", hint: "9文字" },
+                { meaning: "近い", answer: "near", hint: "4文字" },
+                { meaning: "遠い", answer: "far", hint: "3文字" },
+                { meaning: "高い", answer: "expensive", hint: "9文字" },
+                { meaning: "安い", answer: "cheap", hint: "5文字" },
+                { meaning: "強い", answer: "strong", hint: "6文字" },
+                { meaning: "弱い", answer: "weak", hint: "4文字" },
                 { meaning: "速い", answer: "fast", hint: "4文字" },
                 { meaning: "遅い", answer: "slow", hint: "4文字" },
-                { meaning: "良い", answer: "good", hint: "4文字" },
-                { meaning: "悪い", answer: "bad", hint: "3文字" },
-                { meaning: "暑い", answer: "hot", hint: "3文字" },
-                { meaning: "寒い", answer: "cold", hint: "4文字" },
-                { meaning: "友達", answer: "friend", hint: "6文字" },
-                { meaning: "学校", answer: "school", hint: "6文字" },
-                { meaning: "本", answer: "book", hint: "4文字" },
-            ],
-            normal: [
-                { meaning: "重要な", answer: "important", hint: "9文字" },
-                { meaning: "難しい", answer: "difficult", hint: "9文字" },
-                { meaning: "興味深い", answer: "interesting", hint: "11文字" },
-                { meaning: "必要な", answer: "necessary", hint: "9文字" },
-                { meaning: "可能な", answer: "possible", hint: "8文字" },
+                { meaning: "明るい", answer: "bright", hint: "6文字" },
+                { meaning: "暗い", answer: "dark", hint: "4文字" },
+                { meaning: "広い", answer: "wide", hint: "4文字" },
+                { meaning: "狭い", answer: "narrow", hint: "6文字" },
+                { meaning: "深い", answer: "deep", hint: "4文字" },
+                { meaning: "浅い", answer: "shallow", hint: "7文字" },
+                { meaning: "厚い", answer: "thick", hint: "5文字" },
+                { meaning: "薄い", answer: "thin", hint: "4文字" },
+                { meaning: "新しい", answer: "new", hint: "3文字" },
+                { meaning: "古い", answer: "old", hint: "3文字" },
+                { meaning: "若い", answer: "young", hint: "5文字" },
+                { meaning: "年を取った", answer: "elderly", hint: "7文字" },
+                { meaning: "現代的な", answer: "modern", hint: "6文字" },
+                { meaning: "伝統的な", answer: "traditional", hint: "11文字" },
+                { meaning: "国際的な", answer: "international", hint: "13文字" },
+                { meaning: "地域の", answer: "local", hint: "5文字" },
+                
+                // 基本名詞
+                { meaning: "科学", answer: "science", hint: "7文字" },
+                { meaning: "歴史", answer: "history", hint: "7文字" },
+                { meaning: "文化", answer: "culture", hint: "7文字" },
+                { meaning: "社会", answer: "society", hint: "7文字" },
                 { meaning: "環境", answer: "environment", hint: "11文字" },
                 { meaning: "経験", answer: "experience", hint: "10文字" },
                 { meaning: "知識", answer: "knowledge", hint: "9文字" },
-                { meaning: "機会", answer: "opportunity", hint: "11文字" },
-                { meaning: "成功", answer: "success", hint: "7文字" },
-                { meaning: "挑戦", answer: "challenge", hint: "9文字" },
-                { meaning: "創造的な", answer: "creative", hint: "8文字" },
-                { meaning: "効果的な", answer: "effective", hint: "9文字" },
-                { meaning: "影響", answer: "influence", hint: "9文字" },
                 { meaning: "情報", answer: "information", hint: "11文字" },
+                { meaning: "教育", answer: "education", hint: "9文字" },
+                { meaning: "政府", answer: "government", hint: "10文字" },
+                { meaning: "医者", answer: "doctor", hint: "6文字" },
+                { meaning: "看護師", answer: "nurse", hint: "5文字" },
+                { meaning: "科学者", answer: "scientist", hint: "9文字" },
+                { meaning: "芸術家", answer: "artist", hint: "6文字" },
+                { meaning: "音楽家", answer: "musician", hint: "8文字" },
+                { meaning: "選手", answer: "player", hint: "6文字" },
+                { meaning: "料理", answer: "cooking", hint: "7文字" },
+                { meaning: "趣味", answer: "hobby", hint: "5文字" },
+                { meaning: "休暇", answer: "vacation", hint: "8文字" },
+                { meaning: "旅行", answer: "travel", hint: "6文字" },
+                { meaning: "冒険", answer: "adventure", hint: "9文字" },
+                { meaning: "活動", answer: "activity", hint: "8文字" },
+                { meaning: "会話", answer: "conversation", hint: "12文字" },
+                { meaning: "議論", answer: "discussion", hint: "10文字" },
+                { meaning: "意見", answer: "opinion", hint: "7文字" },
+                { meaning: "考え", answer: "thought", hint: "7文字" },
+                { meaning: "アイデア", answer: "idea", hint: "4文字" },
+                { meaning: "計画", answer: "plan", hint: "4文字" },
+                { meaning: "目標", answer: "goal", hint: "4文字" },
+                { meaning: "夢", answer: "dream", hint: "5文字" },
+                { meaning: "希望", answer: "hope", hint: "4文字" },
+                { meaning: "恐れ", answer: "fear", hint: "4文字" },
+                { meaning: "喜び", answer: "joy", hint: "3文字" },
+                { meaning: "悲しみ", answer: "sadness", hint: "7文字" },
+                { meaning: "怒り", answer: "anger", hint: "5文字" },
+                { meaning: "驚き", answer: "surprise", hint: "8文字" },
+                { meaning: "興奮", answer: "excitement", hint: "10文字" },
+                { meaning: "幸福", answer: "happiness", hint: "9文字" },
+                { meaning: "健康", answer: "health", hint: "6文字" },
+                { meaning: "病気", answer: "disease", hint: "7文字" },
+                
+                // 基本動詞
+                { meaning: "訪れる", answer: "visit", hint: "5文字" },
+                { meaning: "説明する", answer: "explain", hint: "7文字" },
+                { meaning: "理解する", answer: "understand", hint: "10文字" },
+                { meaning: "決める", answer: "decide", hint: "6文字" },
+                { meaning: "選ぶ", answer: "choose", hint: "6文字" },
+                { meaning: "始める", answer: "begin", hint: "5文字" },
+                { meaning: "終える", answer: "finish", hint: "6文字" },
+                { meaning: "続ける", answer: "continue", hint: "8文字" },
+                { meaning: "止める", answer: "stop", hint: "4文字" },
+                { meaning: "建てる", answer: "build", hint: "5文字" },
+                { meaning: "壊す", answer: "destroy", hint: "7文字" },
+                { meaning: "作る", answer: "create", hint: "6文字" },
+                { meaning: "発見する", answer: "discover", hint: "8文字" },
+                { meaning: "発明する", answer: "invent", hint: "6文字" },
+                { meaning: "改善する", answer: "improve", hint: "7文字" },
+                { meaning: "増やす", answer: "increase", hint: "8文字" },
+                { meaning: "減らす", answer: "decrease", hint: "8文字" },
+                { meaning: "変える", answer: "change", hint: "6文字" },
+                { meaning: "比較する", answer: "compare", hint: "7文字" },
+                { meaning: "含む", answer: "include", hint: "7文字" },
+                { meaning: "除く", answer: "exclude", hint: "7文字" },
+                { meaning: "混ぜる", answer: "mix", hint: "3文字" },
+                { meaning: "分ける", answer: "divide", hint: "6文字" },
+                { meaning: "結合する", answer: "combine", hint: "7文字" },
+                { meaning: "参加する", answer: "join", hint: "4文字" },
+                { meaning: "残す", answer: "leave", hint: "5文字" },
+                { meaning: "到着する", answer: "arrive", hint: "6文字" },
+                { meaning: "出発する", answer: "depart", hint: "6文字" },
+                { meaning: "戻る", answer: "return", hint: "6文字" },
+                { meaning: "進む", answer: "advance", hint: "7文字" },
+                { meaning: "失敗する", answer: "fail", hint: "4文字" },
+                { meaning: "成功する", answer: "succeed", hint: "7文字" },
+                { meaning: "試みる", answer: "attempt", hint: "7文字" },
+                { meaning: "練習する", answer: "practice", hint: "8文字" },
+                { meaning: "勉強する", answer: "study", hint: "5文字" },
+                { meaning: "教える", answer: "teach", hint: "5文字" },
+                { meaning: "学ぶ", answer: "learn", hint: "5文字" },
+                { meaning: "覚える", answer: "remember", hint: "8文字" },
+                { meaning: "忘れる", answer: "forget", hint: "6文字" },
+                { meaning: "考える", answer: "think", hint: "5文字" },
+                { meaning: "信じる", answer: "believe", hint: "7文字" },
+                { meaning: "疑う", answer: "doubt", hint: "5文字" },
+                { meaning: "期待する", answer: "expect", hint: "6文字" },
+                { meaning: "想像する", answer: "imagine", hint: "7文字" },
             ],
-            hard: [
-                { meaning: "責任", answer: "responsibility", hint: "14文字" },
-                { meaning: "コミュニケーション", answer: "communication", hint: "13文字" },
-                { meaning: "想像力", answer: "imagination", hint: "11文字" },
+            
+            // 英検2級レベル（約400語）
+            normal: [
+                // 中級形容詞
+                { meaning: "適切な", answer: "appropriate", hint: "11文字" },
+                { meaning: "効果的な", answer: "effective", hint: "9文字" },
+                { meaning: "必要な", answer: "necessary", hint: "9文字" },
+                { meaning: "可能な", answer: "possible", hint: "8文字" },
+                { meaning: "不可能な", answer: "impossible", hint: "10文字" },
+                { meaning: "明らかな", answer: "obvious", hint: "7文字" },
+                { meaning: "複雑な", answer: "complex", hint: "7文字" },
+                { meaning: "単純な", answer: "simple", hint: "6文字" },
+                { meaning: "具体的な", answer: "specific", hint: "8文字" },
+                { meaning: "一般的な", answer: "general", hint: "7文字" },
+                { meaning: "公式の", answer: "official", hint: "8文字" },
+                { meaning: "正確な", answer: "accurate", hint: "8文字" },
+                { meaning: "十分な", answer: "sufficient", hint: "10文字" },
+                { meaning: "不十分な", answer: "insufficient", hint: "12文字" },
+                { meaning: "独立した", answer: "independent", hint: "11文字" },
+                { meaning: "依存した", answer: "dependent", hint: "9文字" },
+                { meaning: "積極的な", answer: "positive", hint: "8文字" },
+                { meaning: "消極的な", answer: "negative", hint: "8文字" },
+                { meaning: "永久の", answer: "permanent", hint: "9文字" },
+                { meaning: "一時的な", answer: "temporary", hint: "9文字" },
+                { meaning: "主要な", answer: "primary", hint: "7文字" },
+                { meaning: "二次的な", answer: "secondary", hint: "9文字" },
+                { meaning: "基本的な", answer: "fundamental", hint: "11文字" },
+                { meaning: "本質的な", answer: "essential", hint: "9文字" },
+                { meaning: "重大な", answer: "critical", hint: "8文字" },
+                { meaning: "重要な", answer: "significant", hint: "11文字" },
+                { meaning: "関連した", answer: "relevant", hint: "8文字" },
+                { meaning: "無関係な", answer: "irrelevant", hint: "10文字" },
+                { meaning: "適切な", answer: "suitable", hint: "8文字" },
+                { meaning: "不適切な", answer: "unsuitable", hint: "10文字" },
+                { meaning: "利用可能な", answer: "available", hint: "9文字" },
+                { meaning: "信頼できる", answer: "reliable", hint: "8文字" },
+                { meaning: "柔軟な", answer: "flexible", hint: "8文字" },
+                { meaning: "厳格な", answer: "strict", hint: "6文字" },
+                { meaning: "寛大な", answer: "generous", hint: "8文字" },
+                { meaning: "厳しい", answer: "severe", hint: "6文字" },
+                { meaning: "穏やかな", answer: "mild", hint: "4文字" },
+                { meaning: "極端な", answer: "extreme", hint: "7文字" },
+                { meaning: "適度な", answer: "moderate", hint: "8文字" },
+                { meaning: "過度の", answer: "excessive", hint: "9文字" },
+                
+                // 中級名詞
                 { meaning: "達成", answer: "achievement", hint: "11文字" },
-                { meaning: "一貫性", answer: "consistency", hint: "11文字" },
-                { meaning: "独立", answer: "independence", hint: "12文字" },
-                { meaning: "批判的", answer: "controversial", hint: "13文字" },
-                { meaning: "現象", answer: "phenomenon", hint: "10文字" },
-                { meaning: "哲学", answer: "philosophy", hint: "10文字" },
-                { meaning: "心理学", answer: "psychology", hint: "10文字" },
-                { meaning: "建築", answer: "architecture", hint: "12文字" },
-                { meaning: "起業家", answer: "entrepreneur", hint: "12文字" },
+                { meaning: "影響", answer: "influence", hint: "9文字" },
+                { meaning: "態度", answer: "attitude", hint: "8文字" },
+                { meaning: "能力", answer: "ability", hint: "7文字" },
+                { meaning: "利点", answer: "advantage", hint: "9文字" },
+                { meaning: "欠点", answer: "disadvantage", hint: "12文字" },
+                { meaning: "証拠", answer: "evidence", hint: "8文字" },
+                { meaning: "機能", answer: "function", hint: "8文字" },
+                { meaning: "目的", answer: "purpose", hint: "7文字" },
+                { meaning: "資源", answer: "resource", hint: "8文字" },
+                { meaning: "傾向", answer: "tendency", hint: "8文字" },
+                { meaning: "習慣", answer: "habit", hint: "5文字" },
+                { meaning: "方法", answer: "method", hint: "6文字" },
+                { meaning: "理論", answer: "theory", hint: "6文字" },
+                { meaning: "実践", answer: "practice", hint: "8文字" },
+                { meaning: "原則", answer: "principle", hint: "9文字" },
+                { meaning: "概念", answer: "concept", hint: "7文字" },
+                { meaning: "要素", answer: "element", hint: "7文字" },
+                { meaning: "構造", answer: "structure", hint: "9文字" },
+                { meaning: "過程", answer: "process", hint: "7文字" },
+                { meaning: "手順", answer: "procedure", hint: "9文字" },
+                { meaning: "戦略", answer: "strategy", hint: "8文字" },
+                { meaning: "技術", answer: "technique", hint: "9文字" },
+                { meaning: "システム", answer: "system", hint: "6文字" },
+                { meaning: "組織", answer: "organization", hint: "12文字" },
+                { meaning: "機関", answer: "institution", hint: "11文字" },
+                { meaning: "施設", answer: "facility", hint: "8文字" },
+                { meaning: "装置", answer: "device", hint: "6文字" },
+                { meaning: "道具", answer: "instrument", hint: "10文字" },
+                { meaning: "材料", answer: "material", hint: "8文字" },
+                { meaning: "物質", answer: "substance", hint: "9文字" },
+                { meaning: "内容", answer: "content", hint: "7文字" },
+                { meaning: "形式", answer: "format", hint: "6文字" },
+                { meaning: "様式", answer: "style", hint: "5文字" },
+                { meaning: "種類", answer: "category", hint: "8文字" },
+                { meaning: "部門", answer: "department", hint: "10文字" },
+                { meaning: "分野", answer: "field", hint: "5文字" },
+                { meaning: "領域", answer: "area", hint: "4文字" },
+                { meaning: "範囲", answer: "range", hint: "5文字" },
+                { meaning: "程度", answer: "degree", hint: "6文字" },
+                
+                // 中級動詞
+                { meaning: "達成する", answer: "achieve", hint: "7文字" },
+                { meaning: "発展する", answer: "develop", hint: "7文字" },
+                { meaning: "維持する", answer: "maintain", hint: "8文字" },
+                { meaning: "確立する", answer: "establish", hint: "9文字" },
+                { meaning: "組織する", answer: "organize", hint: "8文字" },
+                { meaning: "管理する", answer: "manage", hint: "6文字" },
+                { meaning: "計画する", answer: "plan", hint: "4文字" },
+                { meaning: "準備する", answer: "prepare", hint: "7文字" },
+                { meaning: "実行する", answer: "execute", hint: "7文字" },
+                { meaning: "評価する", answer: "evaluate", hint: "8文字" },
+                { meaning: "分析する", answer: "analyze", hint: "7文字" },
+                { meaning: "調査する", answer: "investigate", hint: "11文字" },
+                { meaning: "研究する", answer: "research", hint: "8文字" },
+                { meaning: "探求する", answer: "explore", hint: "7文字" },
+                { meaning: "検討する", answer: "examine", hint: "7文字" },
+                { meaning: "認識する", answer: "recognize", hint: "9文字" },
+                { meaning: "識別する", answer: "identify", hint: "8文字" },
+                { meaning: "分類する", answer: "classify", hint: "8文字" },
+                { meaning: "定義する", answer: "define", hint: "6文字" },
+                { meaning: "説明する", answer: "describe", hint: "8文字" },
+                { meaning: "示す", answer: "indicate", hint: "8文字" },
+                { meaning: "表す", answer: "represent", hint: "9文字" },
+                { meaning: "反映する", answer: "reflect", hint: "7文字" },
+                { meaning: "影響する", answer: "affect", hint: "6文字" },
+                { meaning: "決定する", answer: "determine", hint: "9文字" },
+                { meaning: "制御する", answer: "control", hint: "7文字" },
+                { meaning: "制限する", answer: "limit", hint: "5文字" },
+                { meaning: "制約する", answer: "restrict", hint: "8文字" },
+                { meaning: "拡大する", answer: "expand", hint: "6文字" },
+                { meaning: "縮小する", answer: "reduce", hint: "6文字" },
+                { meaning: "強化する", answer: "strengthen", hint: "10文字" },
+                { meaning: "弱める", answer: "weaken", hint: "6文字" },
+                { meaning: "促進する", answer: "promote", hint: "7文字" },
+                { meaning: "妨げる", answer: "prevent", hint: "7文字" },
+                { meaning: "許可する", answer: "permit", hint: "6文字" },
+                { meaning: "禁止する", answer: "forbid", hint: "6文字" },
+                { meaning: "要求する", answer: "require", hint: "7文字" },
+                { meaning: "提供する", answer: "provide", hint: "7文字" },
+                { meaning: "受け取る", answer: "receive", hint: "7文字" },
+                { meaning: "与える", answer: "grant", hint: "5文字" },
+            ],
+            
+            // 英検1級レベル（約450語）
+            hard: [
+                // 上級形容詞
+                { meaning: "曖昧な", answer: "ambiguous", hint: "9文字" },
                 { meaning: "洗練された", answer: "sophisticated", hint: "13文字" },
-                { meaning: "同時に", answer: "simultaneously", hint: "14文字" },
+                { meaning: "包括的な", answer: "comprehensive", hint: "13文字" },
+                { meaning: "議論の余地がある", answer: "controversial", hint: "13文字" },
+                { meaning: "前例のない", answer: "unprecedented", hint: "13文字" },
+                { meaning: "顕著な", answer: "prominent", hint: "9文字" },
+                { meaning: "遍在する", answer: "ubiquitous", hint: "10文字" },
+                { meaning: "一時的な", answer: "transient", hint: "9文字" },
+                { meaning: "永続的な", answer: "perpetual", hint: "9文字" },
+                { meaning: "冗長な", answer: "redundant", hint: "9文字" },
+                { meaning: "簡潔な", answer: "concise", hint: "7文字" },
+                { meaning: "徹底的な", answer: "thorough", hint: "8文字" },
+                { meaning: "厳格な", answer: "rigorous", hint: "8文字" },
+                { meaning: "敵対的な", answer: "hostile", hint: "7文字" },
+                { meaning: "友好的な", answer: "amicable", hint: "8文字" },
+                { meaning: "自律的な", answer: "autonomous", hint: "10文字" },
+                { meaning: "従属的な", answer: "subordinate", hint: "11文字" },
+                { meaning: "体系的な", answer: "systematic", hint: "10文字" },
+                { meaning: "断片的な", answer: "fragmentary", hint: "11文字" },
+                { meaning: "顕在的な", answer: "explicit", hint: "8文字" },
+                { meaning: "潜在的な", answer: "implicit", hint: "8文字" },
+                { meaning: "客観的な", answer: "objective", hint: "9文字" },
+                { meaning: "主観的な", answer: "subjective", hint: "10文字" },
+                { meaning: "絶対的な", answer: "absolute", hint: "8文字" },
+                { meaning: "相対的な", answer: "relative", hint: "8文字" },
+                { meaning: "本質的な", answer: "intrinsic", hint: "9文字" },
+                { meaning: "外在的な", answer: "extrinsic", hint: "9文字" },
+                { meaning: "固有の", answer: "inherent", hint: "8文字" },
+                { meaning: "派生的な", answer: "derivative", hint: "10文字" },
+                { meaning: "優勢な", answer: "dominant", hint: "8文字" },
+                { meaning: "劣勢な", answer: "subordinate", hint: "11文字" },
+                { meaning: "顕著な", answer: "salient", hint: "7文字" },
+                { meaning: "微妙な", answer: "subtle", hint: "6文字" },
+                { meaning: "明白な", answer: "manifest", hint: "8文字" },
+                { meaning: "潜在的な", answer: "latent", hint: "6文字" },
+                { meaning: "明示的な", answer: "overt", hint: "5文字" },
+                { meaning: "暗示的な", answer: "covert", hint: "6文字" },
+                { meaning: "直接的な", answer: "direct", hint: "6文字" },
+                { meaning: "間接的な", answer: "indirect", hint: "8文字" },
+                { meaning: "積極的な", answer: "proactive", hint: "9文字" },
+                { meaning: "受動的な", answer: "passive", hint: "7文字" },
+                
+                // 上級名詞
                 { meaning: "矛盾", answer: "contradiction", hint: "13文字" },
+                { meaning: "現象", answer: "phenomenon", hint: "10文字" },
+                { meaning: "仮説", answer: "hypothesis", hint: "10文字" },
+                { meaning: "推論", answer: "inference", hint: "9文字" },
+                { meaning: "含意", answer: "implication", hint: "11文字" },
+                { meaning: "前提", answer: "premise", hint: "7文字" },
+                { meaning: "結論", answer: "conclusion", hint: "10文字" },
+                { meaning: "根拠", answer: "rationale", hint: "9文字" },
+                { meaning: "基準", answer: "criterion", hint: "9文字" },
+                { meaning: "範囲", answer: "scope", hint: "5文字" },
+                { meaning: "領域", answer: "domain", hint: "6文字" },
+                { meaning: "側面", answer: "aspect", hint: "6文字" },
+                { meaning: "次元", answer: "dimension", hint: "9文字" },
+                { meaning: "視点", answer: "perspective", hint: "11文字" },
+                { meaning: "文脈", answer: "context", hint: "7文字" },
+                { meaning: "枠組み", answer: "framework", hint: "9文字" },
+                { meaning: "パラダイム", answer: "paradigm", hint: "8文字" },
+                { meaning: "メカニズム", answer: "mechanism", hint: "9文字" },
+                { meaning: "動力学", answer: "dynamics", hint: "8文字" },
+                { meaning: "相互作用", answer: "interaction", hint: "11文字" },
+                { meaning: "統合", answer: "integration", hint: "11文字" },
+                { meaning: "分離", answer: "segregation", hint: "11文字" },
+                { meaning: "統一", answer: "unification", hint: "11文字" },
+                { meaning: "分化", answer: "differentiation", hint: "15文字" },
+                { meaning: "進化", answer: "evolution", hint: "9文字" },
+                { meaning: "革命", answer: "revolution", hint: "10文字" },
+                { meaning: "改革", answer: "reform", hint: "6文字" },
+                { meaning: "変革", answer: "transformation", hint: "14文字" },
+                { meaning: "革新", answer: "innovation", hint: "10文字" },
+                { meaning: "保守", answer: "conservation", hint: "12文字" },
+                { meaning: "伝統", answer: "tradition", hint: "9文字" },
+                { meaning: "慣習", answer: "convention", hint: "10文字" },
+                { meaning: "規範", answer: "norm", hint: "4文字" },
+                { meaning: "逸脱", answer: "deviation", hint: "9文字" },
+                { meaning: "異常", answer: "anomaly", hint: "7文字" },
+                { meaning: "例外", answer: "exception", hint: "9文字" },
+                { meaning: "規則", answer: "regulation", hint: "10文字" },
+                { meaning: "原理", answer: "principle", hint: "9文字" },
+                { meaning: "法則", answer: "law", hint: "3文字" },
+                { meaning: "定理", answer: "theorem", hint: "7文字" },
+                
+                // 上級動詞
+                { meaning: "強調する", answer: "emphasize", hint: "9文字" },
+                { meaning: "実施する", answer: "implement", hint: "9文字" },
+                { meaning: "正当化する", answer: "justify", hint: "7文字" },
+                { meaning: "操作する", answer: "manipulate", hint: "10文字" },
+                { meaning: "緩和する", answer: "mitigate", hint: "8文字" },
+                { meaning: "促進する", answer: "facilitate", hint: "10文字" },
+                { meaning: "阻害する", answer: "inhibit", hint: "7文字" },
+                { meaning: "統合する", answer: "integrate", hint: "9文字" },
+                { meaning: "分離する", answer: "segregate", hint: "9文字" },
+                { meaning: "統一する", answer: "unify", hint: "5文字" },
+                { meaning: "多様化する", answer: "diversify", hint: "9文字" },
+                { meaning: "標準化する", answer: "standardize", hint: "11文字" },
+                { meaning: "一般化する", answer: "generalize", hint: "10文字" },
+                { meaning: "合成する", answer: "synthesize", hint: "10文字" },
+                { meaning: "分解する", answer: "decompose", hint: "9文字" },
+                { meaning: "変換する", answer: "transform", hint: "9文字" },
+                { meaning: "保存する", answer: "preserve", hint: "8文字" },
+                { meaning: "維持する", answer: "sustain", hint: "7文字" },
+                { meaning: "持続する", answer: "persist", hint: "7文字" },
+                { meaning: "永続させる", answer: "perpetuate", hint: "10文字" },
+                { meaning: "消滅させる", answer: "extinguish", hint: "10文字" },
+                { meaning: "根絶する", answer: "eradicate", hint: "9文字" },
+                { meaning: "排除する", answer: "eliminate", hint: "9文字" },
+                { meaning: "除去する", answer: "remove", hint: "6文字" },
+                { meaning: "抽出する", answer: "extract", hint: "7文字" },
+                { meaning: "挿入する", answer: "insert", hint: "6文字" },
+                { meaning: "注入する", answer: "inject", hint: "6文字" },
+                { meaning: "放出する", answer: "emit", hint: "4文字" },
+                { meaning: "吸収する", answer: "absorb", hint: "6文字" },
+                { meaning: "反射する", answer: "reflect", hint: "7文字" },
+                { meaning: "屈折する", answer: "refract", hint: "7文字" },
+                { meaning: "拡散する", answer: "diffuse", hint: "7文字" },
+                { meaning: "集中する", answer: "concentrate", hint: "11文字" },
+                { meaning: "分散する", answer: "disperse", hint: "8文字" },
+                { meaning: "収束する", answer: "converge", hint: "8文字" },
+                { meaning: "発散する", answer: "diverge", hint: "7文字" },
+                { meaning: "増幅する", answer: "amplify", hint: "7文字" },
+                { meaning: "減衰する", answer: "attenuate", hint: "9文字" },
+                { meaning: "強化する", answer: "reinforce", hint: "9文字" },
+                { meaning: "弱体化する", answer: "undermine", hint: "9文字" },
             ]
         };
 
@@ -844,6 +1281,48 @@
             osc.stop(now + 0.1);
         }
 
+        // 時間切れ音（ゲームオーバー）
+        function playTimeUpSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            
+            // 下降するサイレン音
+            const osc1 = audioContext.createOscillator();
+            const gainNode1 = audioContext.createGain();
+            
+            osc1.type = 'sawtooth';
+            osc1.frequency.setValueAtTime(440, now);
+            osc1.frequency.exponentialRampToValueAtTime(220, now + 0.5);
+            osc1.frequency.exponentialRampToValueAtTime(110, now + 1.0);
+            
+            gainNode1.gain.setValueAtTime(0.3, now);
+            gainNode1.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+            
+            osc1.connect(gainNode1);
+            gainNode1.connect(audioContext.destination);
+            
+            osc1.start(now);
+            osc1.stop(now + 1.0);
+            
+            // 重ねる低音
+            const osc2 = audioContext.createOscillator();
+            const gainNode2 = audioContext.createGain();
+            
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(110, now);
+            osc2.frequency.exponentialRampToValueAtTime(55, now + 1.0);
+            
+            gainNode2.gain.setValueAtTime(0.2, now);
+            gainNode2.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+            
+            osc2.connect(gainNode2);
+            gainNode2.connect(audioContext.destination);
+            
+            osc2.start(now);
+            osc2.stop(now + 1.0);
+        }
+
         // ミュート切り替え
         function toggleMute() {
             isMuted = !isMuted;
@@ -885,27 +1364,40 @@
             currentAnswer = '';
             currentCursorPos = 0;
             
+            const firstLetter = gameQuestions[currentQuestionIndex].answer[0].toLowerCase();
+            
             for (let i = 0; i < length; i++) {
                 const box = document.createElement('div');
                 box.className = 'letter-box';
                 box.id = `letter-box-${i}`;
+                
+                // 一文字目はヒントとして表示
+                if (i === 0) {
+                    box.textContent = firstLetter;
+                    box.classList.add('filled', 'hint-letter');
+                }
+                
                 container.appendChild(box);
             }
             
-            // 最初のボックスをアクティブに
-            if (length > 0) {
-                document.getElementById('letter-box-0').classList.add('active');
+            // 二文字目をアクティブに（一文字目は固定）
+            if (length > 1) {
+                document.getElementById('letter-box-1').classList.add('active');
             }
         }
 
         // 文字ボックスを更新
         function updateLetterBoxes() {
             const answerLength = gameQuestions[currentQuestionIndex].answer.length;
+            const firstLetter = gameQuestions[currentQuestionIndex].answer[0].toLowerCase();
             
-            for (let i = 0; i < answerLength; i++) {
+            // 一文字目はヒントなのでスキップ、2文字目以降を処理
+            for (let i = 1; i < answerLength; i++) {
                 const box = document.getElementById(`letter-box-${i}`);
-                if (i < currentAnswer.length) {
-                    box.textContent = currentAnswer[i];
+                const answerIndex = i - 1; // currentAnswerのインデックス（一文字目がないので-1）
+                
+                if (answerIndex < currentAnswer.length) {
+                    box.textContent = currentAnswer[answerIndex];
                     box.classList.add('filled');
                     box.classList.remove('active');
                 } else {
@@ -915,15 +1407,16 @@
                 }
             }
             
-            // 現在のカーソル位置をアクティブに
-            if (currentAnswer.length < answerLength) {
-                document.getElementById(`letter-box-${currentAnswer.length}`).classList.add('active');
+            // 現在のカーソル位置をアクティブに（一文字目の次から）
+            if (currentAnswer.length < answerLength - 1) {
+                document.getElementById(`letter-box-${currentAnswer.length + 1}`).classList.add('active');
             }
         }
 
         // キー入力処理
         function handleKeyInput(e) {
             const answerLength = gameQuestions[currentQuestionIndex].answer.length;
+            const requiredInputLength = answerLength - 1; // 一文字目はヒントなので-1
             
             if (e.key === 'Backspace') {
                 e.preventDefault();
@@ -932,17 +1425,17 @@
                     updateLetterBoxes();
                 }
             } else if (e.key === 'Enter') {
-                if (currentAnswer.length === answerLength && !document.getElementById('submit-btn').disabled) {
+                if (currentAnswer.length === requiredInputLength && !document.getElementById('submit-btn').disabled) {
                     checkAnswer();
                 }
             } else if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
                 e.preventDefault();
-                if (currentAnswer.length < answerLength) {
+                if (currentAnswer.length < requiredInputLength) {
                     currentAnswer += e.key.toLowerCase();
                     updateLetterBoxes();
                     
                     // 全部入力したら自動的に回答
-                    if (currentAnswer.length === answerLength) {
+                    if (currentAnswer.length === requiredInputLength) {
                         setTimeout(() => {
                             if (!document.getElementById('submit-btn').disabled) {
                                 checkAnswer();
@@ -1057,7 +1550,7 @@
                 box.textContent = correctAnswer[i];
             }
 
-            playIncorrectSound();
+            playTimeUpSound();
 
             answeredQuestions.push({
                 question: gameQuestions[currentQuestionIndex].meaning,
@@ -1109,9 +1602,8 @@
 
         // 回答チェック
         function checkAnswer() {
-            if (timer) clearInterval(timer);
-
-            const userAnswer = currentAnswer.trim().toLowerCase();
+            const firstLetter = gameQuestions[currentQuestionIndex].answer[0].toLowerCase();
+            const userAnswer = (firstLetter + currentAnswer).trim().toLowerCase();
             const correctAnswer = gameQuestions[currentQuestionIndex].answer.toLowerCase();
             const resultDiv = document.getElementById('result');
             const answerLength = correctAnswer.length;
@@ -1122,6 +1614,9 @@
             if (userAnswer === correctAnswer) {
                 isCorrect = true;
                 correctCount++;
+                
+                // タイマーを停止
+                if (timer) clearInterval(timer);
                 
                 // 残り時間に応じてボーナスポイント
                 points = 10 + Math.floor(timeLeft / 2);
@@ -1154,12 +1649,12 @@
                     nextQuestion();
                 }, 2000);
             } else {
-                // 不正解の場合は入力をクリアして再挑戦可能
+                // 不正解の場合は入力をクリアして再挑戦可能（タイマーは継続）
                 resultDiv.className = 'result incorrect';
                 resultDiv.innerHTML = `❌ 不正解！もう一度入力してください`;
                 
-                // 文字ボックスを一時的に赤く表示
-                for (let i = 0; i < answerLength; i++) {
+                // 文字ボックスを一時的に赤く表示（一文字目はスキップ）
+                for (let i = 1; i < answerLength; i++) {
                     const box = document.getElementById(`letter-box-${i}`);
                     box.classList.add('incorrect');
                 }
@@ -1171,15 +1666,14 @@
                     currentAnswer = '';
                     updateLetterBoxes();
                     
-                    // incorrect クラスを削除
-                    for (let i = 0; i < answerLength; i++) {
+                    // incorrect クラスを削除（一文字目はスキップ）
+                    for (let i = 1; i < answerLength; i++) {
                         document.getElementById(`letter-box-${i}`).classList.remove('incorrect');
                     }
                     
                     resultDiv.style.display = 'none';
                     
-                    // タイマーを再開
-                    startTimer();
+                    // タイマーは継続（再開しない）
                 }, 1000);
             }
         }
@@ -1245,19 +1739,65 @@
             
             // 実際に解答した問題数
             const totalQuestions = answeredQuestions.length;
-            const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
             
-            document.getElementById('final-score').textContent = `${correctCount} / ${totalQuestions} 正解`;
+            // 正解数のみ表示
+            document.getElementById('final-score').textContent = `${correctCount} 問正解`;
             document.getElementById('rank-display').textContent = getRank(correctCount, totalQuestions);
-            document.getElementById('accuracy').textContent = `${accuracy}%`;
-            document.getElementById('total-score').textContent = `${totalScore}点`;
             
             const difficultyNames = {
-                easy: 'かんたん',
-                normal: 'ふつう',
-                hard: 'むずかしい'
+                easy: '英検3級',
+                normal: '英検2級',
+                hard: '英検1級'
             };
             document.getElementById('difficulty-display').textContent = difficultyNames[currentDifficulty];
+
+            // 正解・不正解の単語リストを作成
+            const correctWordsList = document.getElementById('correct-words-list');
+            const incorrectWordsList = document.getElementById('incorrect-words-list');
+            
+            correctWordsList.innerHTML = '';
+            incorrectWordsList.innerHTML = '';
+
+            const correctWords = [];
+            const incorrectWords = [];
+
+            answeredQuestions.forEach(q => {
+                if (q.isCorrect) {
+                    correctWords.push(q);
+                } else {
+                    incorrectWords.push(q);
+                }
+            });
+
+            // 正解した単語を表示
+            if (correctWords.length > 0) {
+                correctWords.forEach(word => {
+                    const item = document.createElement('div');
+                    item.className = 'word-item correct';
+                    item.innerHTML = `
+                        <div class="word-meaning">${word.question}</div>
+                        <div class="word-english">${word.correctAnswer}</div>
+                    `;
+                    correctWordsList.appendChild(item);
+                });
+            } else {
+                correctWordsList.innerHTML = '<div class="no-words">正解した単語はありません</div>';
+            }
+
+            // 間違えた単語を表示
+            if (incorrectWords.length > 0) {
+                incorrectWords.forEach(word => {
+                    const item = document.createElement('div');
+                    item.className = 'word-item incorrect';
+                    item.innerHTML = `
+                        <div class="word-meaning">${word.question}</div>
+                        <div class="word-english">${word.correctAnswer}</div>
+                    `;
+                    incorrectWordsList.appendChild(item);
+                });
+            } else {
+                incorrectWordsList.innerHTML = '<div class="no-words">間違えた単語はありません</div>';
+            }
 
             // LocalStorageにベストスコアを保存
             const bestKey = `best_${currentDifficulty}`;
