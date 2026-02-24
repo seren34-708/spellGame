@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英単語スペリングクイズ</title>
+    <title>VocaDash - 英単語スペリングゲーム</title>
     <style>
         * {
             margin: 0;
@@ -13,38 +13,102 @@
 
         body {
             font-family: 'Arial', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 背景の装飾パーティクル */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
 
         .game-container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 
+                0 30px 90px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+                0 10px 40px rgba(102, 126, 234, 0.2);
             max-width: 700px;
             width: 100%;
             position: relative;
+            animation: containerAppear 0.6s ease-out;
+        }
+
+        @keyframes containerAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            border-radius: 30px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(20px);
         }
 
         .title {
             text-align: center;
-            color: #667eea;
-            font-size: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 42px;
             font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+            letter-spacing: 2px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 30px;
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.4)); }
+            to { filter: drop-shadow(0 0 25px rgba(118, 75, 162, 0.6)); }
         }
 
         /* スタート画面 */
@@ -55,7 +119,68 @@
         .start-screen h2 {
             font-size: 24px;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+        }
+
+        .game-info {
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding: 18px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+            animation: pulseGlow 2s ease-in-out infinite;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 8px 25px rgba(102, 126, 234, 0.4),
+                    0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 
+                    0 12px 35px rgba(102, 126, 234, 0.6),
+                    0 0 0 3px rgba(255, 255, 255, 0.5) inset,
+                    0 0 30px rgba(118, 75, 162, 0.4);
+            }
+        }
+
+        .time-info {
+            display: block;
+            margin-top: 10px;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .difficulty-btn:hover .time-info {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+        }
+
+        .difficulty-btn small {
+            display: block;
+            font-size: 18px;
+            margin-top: 10px;
+            opacity: 0.9;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .difficulty-btn:hover small {
+            color: rgba(255, 255, 255, 0.95);
         }
 
         .difficulty-select {
@@ -65,68 +190,450 @@
         .difficulty-btn {
             display: block;
             width: 100%;
-            padding: 20px;
-            margin: 15px 0;
-            font-size: 20px;
+            padding: 28px;
+            margin: 20px 0;
+            font-size: 26px;
             font-weight: bold;
-            border: 3px solid #667eea;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: none;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(102, 126, 234, 0.1) inset;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .difficulty-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.2), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .difficulty-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .difficulty-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.4),
+                0 0 0 2px rgba(102, 126, 234, 0.3) inset;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        /* スコアボード */
-        .score-board {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            padding: 15px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 10px;
+        .difficulty-btn:active {
+            transform: translateY(-2px) scale(0.98);
         }
 
-        .score-item {
-            text-align: center;
-            flex: 1;
+        /* 難易度別カラー */
+        .difficulty-easy {
+            border-left: 6px solid #10b981;
         }
 
-        .mute-btn {
-            background: none;
+        .difficulty-easy::before {
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15), transparent);
+        }
+
+        .difficulty-easy:hover {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 
+                0 15px 40px rgba(16, 185, 129, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        .difficulty-normal {
+            border-left: 6px solid #f59e0b;
+        }
+
+        .difficulty-normal::before {
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.15), transparent);
+        }
+
+        .difficulty-normal:hover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 
+                0 15px 40px rgba(245, 158, 11, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        .difficulty-hard {
+            border-left: 6px solid #ef4444;
+        }
+
+        .difficulty-hard::before {
+            background: radial-gradient(circle, rgba(239, 68, 68, 0.15), transparent);
+        }
+
+        .difficulty-hard:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 
+                0 15px 40px rgba(239, 68, 68, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        /* ゲーム画面のミュートボタン */
+        .mute-btn-game {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
             border: none;
-            font-size: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 24px;
             cursor: pointer;
-            padding: 5px;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
         }
 
-        .mute-btn:hover {
-            transform: scale(1.2);
+        .mute-btn-game:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
-        .score-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .score-value {
-            font-size: 28px;
+        /* ゲーム画面のホームボタン */
+        .home-btn-game {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
             font-weight: bold;
-            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            z-index: 100;
+        }
+
+        .home-btn-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* レベルアップ通知 */
+        .level-up-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            padding: 50px 80px;
+            border-radius: 30px;
+            box-shadow: 
+                0 30px 90px rgba(102, 126, 234, 0.6),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset,
+                0 0 100px rgba(118, 75, 162, 0.8);
+            z-index: 1000;
+            display: none;
+            animation: levelUpAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-up-notification::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 70%);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .level-up-notification::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            border-radius: 30px;
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: -1;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .level-up-notification.show {
+            display: block;
+            animation: levelUpAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                       backgroundShift 3s ease infinite,
+                       float 3s ease-in-out infinite;
+        }
+
+        @keyframes levelUpAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotateZ(-10deg);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.1) rotateZ(5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotateZ(0deg);
+            }
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+            50% { transform: translate(-50%, -50%) translateY(-10px); }
+        }
+
+        .level-up-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-up-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: iconBounce 0.8s ease-in-out infinite alternate,
+                       rotate 4s linear infinite;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+            display: inline-block;
+        }
+
+        @keyframes iconBounce {
+            from { 
+                transform: translateY(0) scale(1);
+            }
+            to { 
+                transform: translateY(-20px) scale(1.1);
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .level-up-text {
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.8),
+                0 4px 10px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(255, 255, 255, 0.4);
+            line-height: 1.5;
+            animation: textGlow 1.5s ease-in-out infinite alternate;
+            letter-spacing: 2px;
+        }
+
+        @keyframes textGlow {
+            from { 
+                text-shadow: 
+                    0 0 20px rgba(255, 255, 255, 0.8),
+                    0 4px 10px rgba(0, 0, 0, 0.5),
+                    0 0 40px rgba(255, 255, 255, 0.4);
+            }
+            to { 
+                text-shadow: 
+                    0 0 30px rgba(255, 255, 255, 1),
+                    0 4px 15px rgba(0, 0, 0, 0.6),
+                    0 0 60px rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        /* 失敗アニメーション */
+        .failed-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+            background-size: 200% 200%;
+            padding: 50px 80px;
+            border-radius: 30px;
+            box-shadow: 
+                0 30px 90px rgba(239, 68, 68, 0.6),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset,
+                0 0 100px rgba(220, 38, 38, 0.8);
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .failed-notification.show {
+            visibility: visible;
+            pointer-events: auto;
+            animation: failedAppear 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+                       shake 0.5s ease-in-out 0.3s,
+                       fadeOut 0.3s ease-out 1.5s forwards;
+        }
+
+        @keyframes failedAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotate(-15deg);
+            }
+            60% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%) scale(1) translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) scale(1) translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translate(-50%, -50%) scale(1) translateX(10px); }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+                visibility: hidden;
+            }
+        }
+
+        .failed-notification::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.2) 50%, 
+                transparent 70%);
+            animation: shineRed 2s infinite;
+        }
+
+        @keyframes shineRed {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .failed-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .failed-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: iconShake 0.8s ease-in-out;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+            display: inline-block;
+        }
+
+        @keyframes iconShake {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+            20%, 40%, 60%, 80% { transform: rotate(10deg); }
+        }
+
+        .failed-text {
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.8),
+                0 4px 10px rgba(0, 0, 0, 0.5);
+            line-height: 1.5;
+            letter-spacing: 2px;
+        }
+
+        .failed-answer {
+            font-size: 24px;
+            margin-top: 15px;
+            opacity: 0.95;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* パーティクルエフェクト */
+        .level-up-notification .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .level-up-notification .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 1), transparent);
+            border-radius: 50%;
+            animation: particleFloat 3s infinite;
+            opacity: 0;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100%) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100%) translateX(var(--x-offset)) scale(1);
+                opacity: 0;
+            }
         }
 
         /* タイマー */
         .timer-container {
             text-align: center;
             margin-bottom: 20px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .timer {
@@ -134,6 +641,7 @@
             font-weight: bold;
             color: #667eea;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
         }
 
         .timer.warning {
@@ -153,36 +661,72 @@
         }
 
         .question-number {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 15px;
+            font-size: 28px;
             font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
         }
 
         .meaning {
-            font-size: 42px;
+            font-size: 48px;
             font-weight: bold;
             color: #333;
             margin-bottom: 20px;
-            padding: 30px;
+            padding: 35px;
             background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            min-height: 120px;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 40px rgba(253, 203, 110, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            min-height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meaning::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translate(-50%, -50%); }
+            50% { transform: translate(0%, 0%); }
+            100% { transform: translate(-50%, -50%); }
         }
 
         .meaning.urgent {
-            animation: scaleUp 10s linear forwards;
+            animation: scaleUp 10s linear forwards, shake 0.5s ease-in-out infinite;
             background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);
+            box-shadow: 
+                0 20px 50px rgba(255, 118, 117, 0.5),
+                0 0 30px rgba(253, 121, 168, 0.4);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1); }
+            25% { transform: translateX(-2px) scale(1.01); }
+            75% { transform: translateX(2px) scale(1.01); }
         }
 
         @keyframes scaleUp {
             0% { 
-                font-size: 42px;
+                font-size: 48px;
                 transform: scale(1);
             }
             100% { 
@@ -210,34 +754,95 @@
             flex-wrap: wrap;
             padding: 10px;
             outline: none;
+            cursor: text;
+            position: relative;
+        }
+
+        .hidden-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
+        }
+
+        .mobile-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            outline: none;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            background: #f8f9fa;
+        }
+
+        .mobile-input:focus {
+            border-color: #764ba2;
+            background: white;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
         }
 
         .letter-box {
-            width: 45px;
-            height: 55px;
+            width: 50px;
+            height: 60px;
             border: 3px solid #667eea;
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            background: white;
-            transition: all 0.2s;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-transform: lowercase;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            position: relative;
+        }
+
+        .letter-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .letter-box.active {
             border-color: #764ba2;
-            background: #f0f0ff;
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
-            transform: scale(1.1);
+            background: linear-gradient(135deg, #f0f0ff 0%, #e8e8ff 100%);
+            box-shadow: 
+                0 0 30px rgba(102, 126, 234, 0.5),
+                0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: scale(1.15) translateY(-3px);
+        }
+
+        .letter-box.active::before {
+            opacity: 0.2;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.4; }
         }
 
         .letter-box.filled {
             background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
             border-color: #667eea;
+            transform: scale(1.05);
         }
 
         .letter-box.hint-letter {
@@ -245,6 +850,9 @@
             border-color: #f59e0b;
             color: #92400e;
             font-weight: bold;
+            box-shadow: 
+                0 4px 20px rgba(245, 158, 11, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
         }
 
         .letter-box.correct {
@@ -309,12 +917,40 @@
         .submit-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 
+                0 8px 25px rgba(102, 126, 234, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::after {
+            width: 300px;
+            height: 300px;
         }
 
         .submit-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.6),
+                0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(-1px);
         }
 
         .submit-btn:disabled {
@@ -530,27 +1166,6 @@
             background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
         }
 
-        .back-home-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .back-home-btn {
-            background: #95a5a6;
-            color: white;
-            padding: 12px 24px;
-            font-size: 16px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .back-home-btn:hover {
-            background: #7f8c8d;
-            transform: translateY(-2px);
-        }
-
         /* 非表示クラス */
         .hidden {
             display: none !important;
@@ -613,42 +1228,48 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="title">🎮 英単語スペリングクイズ</div>
-        <div class="subtitle">漢字でGO!風 - 日本語から英単語を入力しよう！</div>
+        <div class="title">🎮 VocaDash</div>
 
         <!-- スタート画面 -->
         <div id="start-screen" class="start-screen">
             <h2>難易度を選択してください</h2>
+            <p class="game-info">📝 全10問のチャレンジ！</p>
             <div class="difficulty-select">
-                <button class="difficulty-btn" onclick="startGame('easy')">
-                    😊 かんたん<br><small>英検3級レベル・制限時間20秒</small>
+                <button class="difficulty-btn difficulty-easy" onclick="startGame('easy')">
+                    😊 かんたん<br>
+                    <small>英検3級レベル</small><br>
+                    <small class="time-info">⏱️ 各問20秒</small>
                 </button>
-                <button class="difficulty-btn" onclick="startGame('normal')">
-                    🎯 ふつう<br><small>英検2級レベル・制限時間20秒</small>
+                <button class="difficulty-btn difficulty-normal" onclick="startGame('normal')">
+                    🎯 ふつう<br>
+                    <small>英検2級レベル</small><br>
+                    <small class="time-info">⏱️ 各問20秒</small>
                 </button>
-                <button class="difficulty-btn" onclick="startGame('hard')">
-                    🔥 むずかしい<br><small>英検1級レベル・制限時間20秒</small>
+                <button class="difficulty-btn difficulty-hard" onclick="startGame('hard')">
+                    🔥 むずかしい<br>
+                    <small>英検1級レベル</small><br>
+                    <small class="time-info">⏱️ 各問20秒</small>
                 </button>
             </div>
         </div>
 
         <!-- ゲーム画面 -->
         <div id="game-area" class="hidden">
-            <div class="score-board">
-                <div class="score-item">
-                    <div class="score-label">問題</div>
-                    <div class="score-value" id="question-count">1/10</div>
+            <button id="mute-btn-game" class="mute-btn-game" onclick="toggleMute()">🔊</button>
+            <button id="back-home-game-btn" class="home-btn-game">🏠 ホーム</button>
+
+            <div class="level-up-notification" id="level-up-notification">
+                <div class="level-up-content">
+                    <div class="level-up-icon">⬆️</div>
+                    <div class="level-up-text"></div>
                 </div>
-                <div class="score-item">
-                    <div class="score-label">正解</div>
-                    <div class="score-value" id="correct-count">0</div>
-                </div>
-                <div class="score-item">
-                    <div class="score-label">スコア</div>
-                    <div class="score-value" id="score">0</div>
-                </div>
-                <div class="score-item">
-                    <button id="mute-btn" class="mute-btn" onclick="toggleMute()">🔊</button>
+            </div>
+
+            <div class="failed-notification" id="failed-notification" style="transform: translate(-50%, -50%) scale(0); visibility: hidden; opacity: 0;">
+                <div class="failed-content">
+                    <div class="failed-icon">❌</div>
+                    <div class="failed-text"></div>
+                    <div class="failed-answer"></div>
                 </div>
             </div>
 
@@ -657,7 +1278,7 @@
             </div>
 
             <div class="question-area">
-                <div class="question-number">第<span id="current-question">1</span>問</div>
+                <div class="question-number">Q<span id="current-question">1</span></div>
                 <div class="meaning" id="meaning">準備中...</div>
                 <div class="hint" id="hint"></div>
             </div>
@@ -665,17 +1286,13 @@
             <div class="result" id="result"></div>
 
             <div class="input-area">
-                <div id="letter-boxes" class="letter-boxes"></div>
-                <input type="text" id="answer-input" style="position: absolute; left: -9999px;" autocomplete="off">
+                <div id="letter-boxes" class="letter-boxes" tabindex="0"></div>
+                <input type="text" id="answer-input" class="hidden-input" autocomplete="off" autocapitalize="off" spellcheck="false">
             </div>
 
             <div class="button-area">
                 <button class="submit-btn" id="submit-btn">回答する</button>
                 <button class="skip-btn" id="skip-btn">スキップ <span id="skip-count">(残り1回)</span></button>
-            </div>
-
-            <div class="back-home-container">
-                <button class="back-home-btn" id="back-home-game-btn">🏠 ホームに戻る</button>
             </div>
         </div>
 
@@ -709,413 +1326,229 @@
     </div>
 
     <script>
-        // 問題データ（英検レベル別・大幅拡張版）
+        // 問題データ（英検レベル別・段階的難易度）
         const questionBank = {
-            // 英検3級レベル（約350語）
-            easy: [
-                // 基本形容詞・副詞
-                { meaning: "美しい", answer: "beautiful", hint: "9文字" },
-                { meaning: "重要な", answer: "important", hint: "9文字" },
-                { meaning: "興味深い", answer: "interesting", hint: "11文字" },
-                { meaning: "人気のある", answer: "popular", hint: "7文字" },
-                { meaning: "便利な", answer: "convenient", hint: "10文字" },
-                { meaning: "有名な", answer: "famous", hint: "6文字" },
-                { meaning: "健康な", answer: "healthy", hint: "7文字" },
-                { meaning: "特別な", answer: "special", hint: "7文字" },
-                { meaning: "完璧な", answer: "perfect", hint: "7文字" },
-                { meaning: "自然な", answer: "natural", hint: "7文字" },
-                { meaning: "安全な", answer: "safe", hint: "4文字" },
-                { meaning: "危険な", answer: "dangerous", hint: "9文字" },
-                { meaning: "静かな", answer: "quiet", hint: "5文字" },
-                { meaning: "うるさい", answer: "noisy", hint: "5文字" },
-                { meaning: "簡単な", answer: "easy", hint: "4文字" },
-                { meaning: "難しい", answer: "difficult", hint: "9文字" },
-                { meaning: "近い", answer: "near", hint: "4文字" },
-                { meaning: "遠い", answer: "far", hint: "3文字" },
-                { meaning: "高い", answer: "expensive", hint: "9文字" },
-                { meaning: "安い", answer: "cheap", hint: "5文字" },
-                { meaning: "強い", answer: "strong", hint: "6文字" },
-                { meaning: "弱い", answer: "weak", hint: "4文字" },
-                { meaning: "速い", answer: "fast", hint: "4文字" },
-                { meaning: "遅い", answer: "slow", hint: "4文字" },
-                { meaning: "明るい", answer: "bright", hint: "6文字" },
-                { meaning: "暗い", answer: "dark", hint: "4文字" },
-                { meaning: "広い", answer: "wide", hint: "4文字" },
-                { meaning: "狭い", answer: "narrow", hint: "6文字" },
-                { meaning: "深い", answer: "deep", hint: "4文字" },
-                { meaning: "浅い", answer: "shallow", hint: "7文字" },
-                { meaning: "厚い", answer: "thick", hint: "5文字" },
-                { meaning: "薄い", answer: "thin", hint: "4文字" },
-                { meaning: "新しい", answer: "new", hint: "3文字" },
-                { meaning: "古い", answer: "old", hint: "3文字" },
-                { meaning: "若い", answer: "young", hint: "5文字" },
-                { meaning: "年を取った", answer: "elderly", hint: "7文字" },
-                { meaning: "現代的な", answer: "modern", hint: "6文字" },
-                { meaning: "伝統的な", answer: "traditional", hint: "11文字" },
-                { meaning: "国際的な", answer: "international", hint: "13文字" },
-                { meaning: "地域の", answer: "local", hint: "5文字" },
-                
-                // 基本名詞
-                { meaning: "科学", answer: "science", hint: "7文字" },
-                { meaning: "歴史", answer: "history", hint: "7文字" },
-                { meaning: "文化", answer: "culture", hint: "7文字" },
-                { meaning: "社会", answer: "society", hint: "7文字" },
-                { meaning: "環境", answer: "environment", hint: "11文字" },
-                { meaning: "経験", answer: "experience", hint: "10文字" },
-                { meaning: "知識", answer: "knowledge", hint: "9文字" },
-                { meaning: "情報", answer: "information", hint: "11文字" },
-                { meaning: "教育", answer: "education", hint: "9文字" },
-                { meaning: "政府", answer: "government", hint: "10文字" },
-                { meaning: "医者", answer: "doctor", hint: "6文字" },
-                { meaning: "看護師", answer: "nurse", hint: "5文字" },
-                { meaning: "科学者", answer: "scientist", hint: "9文字" },
-                { meaning: "芸術家", answer: "artist", hint: "6文字" },
-                { meaning: "音楽家", answer: "musician", hint: "8文字" },
-                { meaning: "選手", answer: "player", hint: "6文字" },
-                { meaning: "料理", answer: "cooking", hint: "7文字" },
-                { meaning: "趣味", answer: "hobby", hint: "5文字" },
-                { meaning: "休暇", answer: "vacation", hint: "8文字" },
-                { meaning: "旅行", answer: "travel", hint: "6文字" },
-                { meaning: "冒険", answer: "adventure", hint: "9文字" },
-                { meaning: "活動", answer: "activity", hint: "8文字" },
-                { meaning: "会話", answer: "conversation", hint: "12文字" },
-                { meaning: "議論", answer: "discussion", hint: "10文字" },
-                { meaning: "意見", answer: "opinion", hint: "7文字" },
-                { meaning: "考え", answer: "thought", hint: "7文字" },
-                { meaning: "アイデア", answer: "idea", hint: "4文字" },
-                { meaning: "計画", answer: "plan", hint: "4文字" },
-                { meaning: "目標", answer: "goal", hint: "4文字" },
-                { meaning: "夢", answer: "dream", hint: "5文字" },
-                { meaning: "希望", answer: "hope", hint: "4文字" },
-                { meaning: "恐れ", answer: "fear", hint: "4文字" },
-                { meaning: "喜び", answer: "joy", hint: "3文字" },
-                { meaning: "悲しみ", answer: "sadness", hint: "7文字" },
-                { meaning: "怒り", answer: "anger", hint: "5文字" },
-                { meaning: "驚き", answer: "surprise", hint: "8文字" },
-                { meaning: "興奮", answer: "excitement", hint: "10文字" },
-                { meaning: "幸福", answer: "happiness", hint: "9文字" },
-                { meaning: "健康", answer: "health", hint: "6文字" },
-                { meaning: "病気", answer: "disease", hint: "7文字" },
-                
-                // 基本動詞
-                { meaning: "訪れる", answer: "visit", hint: "5文字" },
-                { meaning: "説明する", answer: "explain", hint: "7文字" },
-                { meaning: "理解する", answer: "understand", hint: "10文字" },
-                { meaning: "決める", answer: "decide", hint: "6文字" },
-                { meaning: "選ぶ", answer: "choose", hint: "6文字" },
-                { meaning: "始める", answer: "begin", hint: "5文字" },
-                { meaning: "終える", answer: "finish", hint: "6文字" },
-                { meaning: "続ける", answer: "continue", hint: "8文字" },
-                { meaning: "止める", answer: "stop", hint: "4文字" },
-                { meaning: "建てる", answer: "build", hint: "5文字" },
-                { meaning: "壊す", answer: "destroy", hint: "7文字" },
-                { meaning: "作る", answer: "create", hint: "6文字" },
-                { meaning: "発見する", answer: "discover", hint: "8文字" },
-                { meaning: "発明する", answer: "invent", hint: "6文字" },
-                { meaning: "改善する", answer: "improve", hint: "7文字" },
-                { meaning: "増やす", answer: "increase", hint: "8文字" },
-                { meaning: "減らす", answer: "decrease", hint: "8文字" },
-                { meaning: "変える", answer: "change", hint: "6文字" },
-                { meaning: "比較する", answer: "compare", hint: "7文字" },
-                { meaning: "含む", answer: "include", hint: "7文字" },
-                { meaning: "除く", answer: "exclude", hint: "7文字" },
-                { meaning: "混ぜる", answer: "mix", hint: "3文字" },
-                { meaning: "分ける", answer: "divide", hint: "6文字" },
-                { meaning: "結合する", answer: "combine", hint: "7文字" },
-                { meaning: "参加する", answer: "join", hint: "4文字" },
-                { meaning: "残す", answer: "leave", hint: "5文字" },
-                { meaning: "到着する", answer: "arrive", hint: "6文字" },
-                { meaning: "出発する", answer: "depart", hint: "6文字" },
-                { meaning: "戻る", answer: "return", hint: "6文字" },
-                { meaning: "進む", answer: "advance", hint: "7文字" },
-                { meaning: "失敗する", answer: "fail", hint: "4文字" },
-                { meaning: "成功する", answer: "succeed", hint: "7文字" },
-                { meaning: "試みる", answer: "attempt", hint: "7文字" },
-                { meaning: "練習する", answer: "practice", hint: "8文字" },
-                { meaning: "勉強する", answer: "study", hint: "5文字" },
-                { meaning: "教える", answer: "teach", hint: "5文字" },
-                { meaning: "学ぶ", answer: "learn", hint: "5文字" },
-                { meaning: "覚える", answer: "remember", hint: "8文字" },
-                { meaning: "忘れる", answer: "forget", hint: "6文字" },
-                { meaning: "考える", answer: "think", hint: "5文字" },
-                { meaning: "信じる", answer: "believe", hint: "7文字" },
-                { meaning: "疑う", answer: "doubt", hint: "5文字" },
-                { meaning: "期待する", answer: "expect", hint: "6文字" },
-                { meaning: "想像する", answer: "imagine", hint: "7文字" },
-            ],
+            // かんたん：英検5級(4問) → 4級(3問) → 3級(3問)
+            easy: {
+                grade5: [ // 英検5級レベル（超基礎）
+                    { meaning: "大きい", answer: "big", hint: "3文字" },
+                    { meaning: "小さい", answer: "small", hint: "5文字" },
+                    { meaning: "良い", answer: "good", hint: "4文字" },
+                    { meaning: "新しい", answer: "new", hint: "3文字" },
+                    { meaning: "古い", answer: "old", hint: "3文字" },
+                    { meaning: "速い", answer: "fast", hint: "4文字" },
+                    { meaning: "遅い", answer: "slow", hint: "4文字" },
+                    { meaning: "暑い", answer: "hot", hint: "3文字" },
+                    { meaning: "寒い", answer: "cold", hint: "4文字" },
+                    { meaning: "長い", answer: "long", hint: "4文字" },
+                    { meaning: "短い", answer: "short", hint: "5文字" },
+                    { meaning: "高い", answer: "high", hint: "4文字" },
+                    { meaning: "低い", answer: "low", hint: "3文字" },
+                    { meaning: "幸せな", answer: "happy", hint: "5文字" },
+                    { meaning: "悲しい", answer: "sad", hint: "3文字" },
+                    { meaning: "若い", answer: "young", hint: "5文字" },
+                    { meaning: "友達", answer: "friend", hint: "6文字" },
+                    { meaning: "家族", answer: "family", hint: "6文字" },
+                    { meaning: "学校", answer: "school", hint: "6文字" },
+                    { meaning: "本", answer: "book", hint: "4文字" },
+                ],
+                grade4: [ // 英検4級レベル（基礎）
+                    { meaning: "美しい", answer: "beautiful", hint: "9文字" },
+                    { meaning: "便利な", answer: "convenient", hint: "10文字" },
+                    { meaning: "人気のある", answer: "popular", hint: "7文字" },
+                    { meaning: "有名な", answer: "famous", hint: "6文字" },
+                    { meaning: "健康な", answer: "healthy", hint: "7文字" },
+                    { meaning: "危険な", answer: "dangerous", hint: "9文字" },
+                    { meaning: "静かな", answer: "quiet", hint: "5文字" },
+                    { meaning: "うるさい", answer: "noisy", hint: "5文字" },
+                    { meaning: "明るい", answer: "bright", hint: "6文字" },
+                    { meaning: "暗い", answer: "dark", hint: "4文字" },
+                    { meaning: "簡単な", answer: "easy", hint: "4文字" },
+                    { meaning: "強い", answer: "strong", hint: "6文字" },
+                    { meaning: "弱い", answer: "weak", hint: "4文字" },
+                    { meaning: "安全な", answer: "safe", hint: "4文字" },
+                    { meaning: "訪れる", answer: "visit", hint: "5文字" },
+                    { meaning: "理解する", answer: "understand", hint: "10文字" },
+                    { meaning: "説明する", answer: "explain", hint: "7文字" },
+                    { meaning: "選ぶ", answer: "choose", hint: "6文字" },
+                    { meaning: "旅行", answer: "travel", hint: "6文字" },
+                    { meaning: "休暇", answer: "vacation", hint: "8文字" },
+                ],
+                grade3: [ // 英検3級レベル（中学卒業）
+                    { meaning: "重要な", answer: "important", hint: "9文字" },
+                    { meaning: "興味深い", answer: "interesting", hint: "11文字" },
+                    { meaning: "特別な", answer: "special", hint: "7文字" },
+                    { meaning: "完璧な", answer: "perfect", hint: "7文字" },
+                    { meaning: "自然な", answer: "natural", hint: "7文字" },
+                    { meaning: "国際的な", answer: "international", hint: "13文字" },
+                    { meaning: "伝統的な", answer: "traditional", hint: "11文字" },
+                    { meaning: "現代的な", answer: "modern", hint: "6文字" },
+                    { meaning: "科学", answer: "science", hint: "7文字" },
+                    { meaning: "歴史", answer: "history", hint: "7文字" },
+                    { meaning: "文化", answer: "culture", hint: "7文字" },
+                    { meaning: "社会", answer: "society", hint: "7文字" },
+                    { meaning: "環境", answer: "environment", hint: "11文字" },
+                    { meaning: "経験", answer: "experience", hint: "10文字" },
+                    { meaning: "知識", answer: "knowledge", hint: "9文字" },
+                    { meaning: "教育", answer: "education", hint: "9文字" },
+                    { meaning: "情報", answer: "information", hint: "11文字" },
+                    { meaning: "政府", answer: "government", hint: "10文字" },
+                    { meaning: "発見する", answer: "discover", hint: "8文字" },
+                    { meaning: "改善する", answer: "improve", hint: "7文字" },
+                ]
+            },
             
-            // 英検2級レベル（約400語）
-            normal: [
-                // 中級形容詞
-                { meaning: "適切な", answer: "appropriate", hint: "11文字" },
-                { meaning: "効果的な", answer: "effective", hint: "9文字" },
-                { meaning: "必要な", answer: "necessary", hint: "9文字" },
-                { meaning: "可能な", answer: "possible", hint: "8文字" },
-                { meaning: "不可能な", answer: "impossible", hint: "10文字" },
-                { meaning: "明らかな", answer: "obvious", hint: "7文字" },
-                { meaning: "複雑な", answer: "complex", hint: "7文字" },
-                { meaning: "単純な", answer: "simple", hint: "6文字" },
-                { meaning: "具体的な", answer: "specific", hint: "8文字" },
-                { meaning: "一般的な", answer: "general", hint: "7文字" },
-                { meaning: "公式の", answer: "official", hint: "8文字" },
-                { meaning: "正確な", answer: "accurate", hint: "8文字" },
-                { meaning: "十分な", answer: "sufficient", hint: "10文字" },
-                { meaning: "不十分な", answer: "insufficient", hint: "12文字" },
-                { meaning: "独立した", answer: "independent", hint: "11文字" },
-                { meaning: "依存した", answer: "dependent", hint: "9文字" },
-                { meaning: "積極的な", answer: "positive", hint: "8文字" },
-                { meaning: "消極的な", answer: "negative", hint: "8文字" },
-                { meaning: "永久の", answer: "permanent", hint: "9文字" },
-                { meaning: "一時的な", answer: "temporary", hint: "9文字" },
-                { meaning: "主要な", answer: "primary", hint: "7文字" },
-                { meaning: "二次的な", answer: "secondary", hint: "9文字" },
-                { meaning: "基本的な", answer: "fundamental", hint: "11文字" },
-                { meaning: "本質的な", answer: "essential", hint: "9文字" },
-                { meaning: "重大な", answer: "critical", hint: "8文字" },
-                { meaning: "重要な", answer: "significant", hint: "11文字" },
-                { meaning: "関連した", answer: "relevant", hint: "8文字" },
-                { meaning: "無関係な", answer: "irrelevant", hint: "10文字" },
-                { meaning: "適切な", answer: "suitable", hint: "8文字" },
-                { meaning: "不適切な", answer: "unsuitable", hint: "10文字" },
-                { meaning: "利用可能な", answer: "available", hint: "9文字" },
-                { meaning: "信頼できる", answer: "reliable", hint: "8文字" },
-                { meaning: "柔軟な", answer: "flexible", hint: "8文字" },
-                { meaning: "厳格な", answer: "strict", hint: "6文字" },
-                { meaning: "寛大な", answer: "generous", hint: "8文字" },
-                { meaning: "厳しい", answer: "severe", hint: "6文字" },
-                { meaning: "穏やかな", answer: "mild", hint: "4文字" },
-                { meaning: "極端な", answer: "extreme", hint: "7文字" },
-                { meaning: "適度な", answer: "moderate", hint: "8文字" },
-                { meaning: "過度の", answer: "excessive", hint: "9文字" },
-                
-                // 中級名詞
-                { meaning: "達成", answer: "achievement", hint: "11文字" },
-                { meaning: "影響", answer: "influence", hint: "9文字" },
-                { meaning: "態度", answer: "attitude", hint: "8文字" },
-                { meaning: "能力", answer: "ability", hint: "7文字" },
-                { meaning: "利点", answer: "advantage", hint: "9文字" },
-                { meaning: "欠点", answer: "disadvantage", hint: "12文字" },
-                { meaning: "証拠", answer: "evidence", hint: "8文字" },
-                { meaning: "機能", answer: "function", hint: "8文字" },
-                { meaning: "目的", answer: "purpose", hint: "7文字" },
-                { meaning: "資源", answer: "resource", hint: "8文字" },
-                { meaning: "傾向", answer: "tendency", hint: "8文字" },
-                { meaning: "習慣", answer: "habit", hint: "5文字" },
-                { meaning: "方法", answer: "method", hint: "6文字" },
-                { meaning: "理論", answer: "theory", hint: "6文字" },
-                { meaning: "実践", answer: "practice", hint: "8文字" },
-                { meaning: "原則", answer: "principle", hint: "9文字" },
-                { meaning: "概念", answer: "concept", hint: "7文字" },
-                { meaning: "要素", answer: "element", hint: "7文字" },
-                { meaning: "構造", answer: "structure", hint: "9文字" },
-                { meaning: "過程", answer: "process", hint: "7文字" },
-                { meaning: "手順", answer: "procedure", hint: "9文字" },
-                { meaning: "戦略", answer: "strategy", hint: "8文字" },
-                { meaning: "技術", answer: "technique", hint: "9文字" },
-                { meaning: "システム", answer: "system", hint: "6文字" },
-                { meaning: "組織", answer: "organization", hint: "12文字" },
-                { meaning: "機関", answer: "institution", hint: "11文字" },
-                { meaning: "施設", answer: "facility", hint: "8文字" },
-                { meaning: "装置", answer: "device", hint: "6文字" },
-                { meaning: "道具", answer: "instrument", hint: "10文字" },
-                { meaning: "材料", answer: "material", hint: "8文字" },
-                { meaning: "物質", answer: "substance", hint: "9文字" },
-                { meaning: "内容", answer: "content", hint: "7文字" },
-                { meaning: "形式", answer: "format", hint: "6文字" },
-                { meaning: "様式", answer: "style", hint: "5文字" },
-                { meaning: "種類", answer: "category", hint: "8文字" },
-                { meaning: "部門", answer: "department", hint: "10文字" },
-                { meaning: "分野", answer: "field", hint: "5文字" },
-                { meaning: "領域", answer: "area", hint: "4文字" },
-                { meaning: "範囲", answer: "range", hint: "5文字" },
-                { meaning: "程度", answer: "degree", hint: "6文字" },
-                
-                // 中級動詞
-                { meaning: "達成する", answer: "achieve", hint: "7文字" },
-                { meaning: "発展する", answer: "develop", hint: "7文字" },
-                { meaning: "維持する", answer: "maintain", hint: "8文字" },
-                { meaning: "確立する", answer: "establish", hint: "9文字" },
-                { meaning: "組織する", answer: "organize", hint: "8文字" },
-                { meaning: "管理する", answer: "manage", hint: "6文字" },
-                { meaning: "計画する", answer: "plan", hint: "4文字" },
-                { meaning: "準備する", answer: "prepare", hint: "7文字" },
-                { meaning: "実行する", answer: "execute", hint: "7文字" },
-                { meaning: "評価する", answer: "evaluate", hint: "8文字" },
-                { meaning: "分析する", answer: "analyze", hint: "7文字" },
-                { meaning: "調査する", answer: "investigate", hint: "11文字" },
-                { meaning: "研究する", answer: "research", hint: "8文字" },
-                { meaning: "探求する", answer: "explore", hint: "7文字" },
-                { meaning: "検討する", answer: "examine", hint: "7文字" },
-                { meaning: "認識する", answer: "recognize", hint: "9文字" },
-                { meaning: "識別する", answer: "identify", hint: "8文字" },
-                { meaning: "分類する", answer: "classify", hint: "8文字" },
-                { meaning: "定義する", answer: "define", hint: "6文字" },
-                { meaning: "説明する", answer: "describe", hint: "8文字" },
-                { meaning: "示す", answer: "indicate", hint: "8文字" },
-                { meaning: "表す", answer: "represent", hint: "9文字" },
-                { meaning: "反映する", answer: "reflect", hint: "7文字" },
-                { meaning: "影響する", answer: "affect", hint: "6文字" },
-                { meaning: "決定する", answer: "determine", hint: "9文字" },
-                { meaning: "制御する", answer: "control", hint: "7文字" },
-                { meaning: "制限する", answer: "limit", hint: "5文字" },
-                { meaning: "制約する", answer: "restrict", hint: "8文字" },
-                { meaning: "拡大する", answer: "expand", hint: "6文字" },
-                { meaning: "縮小する", answer: "reduce", hint: "6文字" },
-                { meaning: "強化する", answer: "strengthen", hint: "10文字" },
-                { meaning: "弱める", answer: "weaken", hint: "6文字" },
-                { meaning: "促進する", answer: "promote", hint: "7文字" },
-                { meaning: "妨げる", answer: "prevent", hint: "7文字" },
-                { meaning: "許可する", answer: "permit", hint: "6文字" },
-                { meaning: "禁止する", answer: "forbid", hint: "6文字" },
-                { meaning: "要求する", answer: "require", hint: "7文字" },
-                { meaning: "提供する", answer: "provide", hint: "7文字" },
-                { meaning: "受け取る", answer: "receive", hint: "7文字" },
-                { meaning: "与える", answer: "grant", hint: "5文字" },
-            ],
+            // ふつう：英検準2級(4問) → 2級前半(3問) → 2級後半(3問)
+            normal: {
+                preGrade2: [ // 英検準2級レベル
+                    { meaning: "難しい", answer: "difficult", hint: "9文字" },
+                    { meaning: "必要な", answer: "necessary", hint: "9文字" },
+                    { meaning: "可能な", answer: "possible", hint: "8文字" },
+                    { meaning: "不可能な", answer: "impossible", hint: "10文字" },
+                    { meaning: "明らかな", answer: "obvious", hint: "7文字" },
+                    { meaning: "単純な", answer: "simple", hint: "6文字" },
+                    { meaning: "一般的な", answer: "general", hint: "7文字" },
+                    { meaning: "特定の", answer: "particular", hint: "10文字" },
+                    { meaning: "成功する", answer: "succeed", hint: "7文字" },
+                    { meaning: "失敗する", answer: "fail", hint: "4文字" },
+                    { meaning: "続ける", answer: "continue", hint: "8文字" },
+                    { meaning: "増やす", answer: "increase", hint: "8文字" },
+                    { meaning: "減らす", answer: "decrease", hint: "8文字" },
+                    { meaning: "変える", answer: "change", hint: "6文字" },
+                    { meaning: "比較する", answer: "compare", hint: "7文字" },
+                    { meaning: "含む", answer: "include", hint: "7文字" },
+                    { meaning: "挑戦", answer: "challenge", hint: "9文字" },
+                    { meaning: "機会", answer: "opportunity", hint: "11文字" },
+                    { meaning: "成功", answer: "success", hint: "7文字" },
+                    { meaning: "結果", answer: "result", hint: "6文字" },
+                ],
+                grade2Early: [ // 英検2級前半レベル
+                    { meaning: "効果的な", answer: "effective", hint: "9文字" },
+                    { meaning: "適切な", answer: "appropriate", hint: "11文字" },
+                    { meaning: "複雑な", answer: "complex", hint: "7文字" },
+                    { meaning: "具体的な", answer: "specific", hint: "8文字" },
+                    { meaning: "公式の", answer: "official", hint: "8文字" },
+                    { meaning: "正確な", answer: "accurate", hint: "8文字" },
+                    { meaning: "十分な", answer: "sufficient", hint: "10文字" },
+                    { meaning: "独立した", answer: "independent", hint: "11文字" },
+                    { meaning: "達成する", answer: "achieve", hint: "7文字" },
+                    { meaning: "発展する", answer: "develop", hint: "7文字" },
+                    { meaning: "維持する", answer: "maintain", hint: "8文字" },
+                    { meaning: "確立する", answer: "establish", hint: "9文字" },
+                    { meaning: "影響", answer: "influence", hint: "9文字" },
+                    { meaning: "態度", answer: "attitude", hint: "8文字" },
+                    { meaning: "能力", answer: "ability", hint: "7文字" },
+                    { meaning: "利点", answer: "advantage", hint: "9文字" },
+                    { meaning: "証拠", answer: "evidence", hint: "8文字" },
+                    { meaning: "達成", answer: "achievement", hint: "11文字" },
+                    { meaning: "目的", answer: "purpose", hint: "7文字" },
+                    { meaning: "方法", answer: "method", hint: "6文字" },
+                ],
+                grade2Late: [ // 英検2級後半レベル
+                    { meaning: "積極的な", answer: "positive", hint: "8文字" },
+                    { meaning: "消極的な", answer: "negative", hint: "8文字" },
+                    { meaning: "永久の", answer: "permanent", hint: "9文字" },
+                    { meaning: "一時的な", answer: "temporary", hint: "9文字" },
+                    { meaning: "主要な", answer: "primary", hint: "7文字" },
+                    { meaning: "本質的な", answer: "essential", hint: "9文字" },
+                    { meaning: "重大な", answer: "critical", hint: "8文字" },
+                    { meaning: "重要な", answer: "significant", hint: "11文字" },
+                    { meaning: "関連した", answer: "relevant", hint: "8文字" },
+                    { meaning: "組織する", answer: "organize", hint: "8文字" },
+                    { meaning: "管理する", answer: "manage", hint: "6文字" },
+                    { meaning: "評価する", answer: "evaluate", hint: "8文字" },
+                    { meaning: "分析する", answer: "analyze", hint: "7文字" },
+                    { meaning: "調査する", answer: "investigate", hint: "11文字" },
+                    { meaning: "研究する", answer: "research", hint: "8文字" },
+                    { meaning: "機能", answer: "function", hint: "8文字" },
+                    { meaning: "資源", answer: "resource", hint: "8文字" },
+                    { meaning: "傾向", answer: "tendency", hint: "8文字" },
+                    { meaning: "原則", answer: "principle", hint: "9文字" },
+                    { meaning: "概念", answer: "concept", hint: "7文字" },
+                ]
+            },
             
-            // 英検1級レベル（約450語）
-            hard: [
-                // 上級形容詞
-                { meaning: "曖昧な", answer: "ambiguous", hint: "9文字" },
-                { meaning: "洗練された", answer: "sophisticated", hint: "13文字" },
-                { meaning: "包括的な", answer: "comprehensive", hint: "13文字" },
-                { meaning: "議論の余地がある", answer: "controversial", hint: "13文字" },
-                { meaning: "前例のない", answer: "unprecedented", hint: "13文字" },
-                { meaning: "顕著な", answer: "prominent", hint: "9文字" },
-                { meaning: "遍在する", answer: "ubiquitous", hint: "10文字" },
-                { meaning: "一時的な", answer: "transient", hint: "9文字" },
-                { meaning: "永続的な", answer: "perpetual", hint: "9文字" },
-                { meaning: "冗長な", answer: "redundant", hint: "9文字" },
-                { meaning: "簡潔な", answer: "concise", hint: "7文字" },
-                { meaning: "徹底的な", answer: "thorough", hint: "8文字" },
-                { meaning: "厳格な", answer: "rigorous", hint: "8文字" },
-                { meaning: "敵対的な", answer: "hostile", hint: "7文字" },
-                { meaning: "友好的な", answer: "amicable", hint: "8文字" },
-                { meaning: "自律的な", answer: "autonomous", hint: "10文字" },
-                { meaning: "従属的な", answer: "subordinate", hint: "11文字" },
-                { meaning: "体系的な", answer: "systematic", hint: "10文字" },
-                { meaning: "断片的な", answer: "fragmentary", hint: "11文字" },
-                { meaning: "顕在的な", answer: "explicit", hint: "8文字" },
-                { meaning: "潜在的な", answer: "implicit", hint: "8文字" },
-                { meaning: "客観的な", answer: "objective", hint: "9文字" },
-                { meaning: "主観的な", answer: "subjective", hint: "10文字" },
-                { meaning: "絶対的な", answer: "absolute", hint: "8文字" },
-                { meaning: "相対的な", answer: "relative", hint: "8文字" },
-                { meaning: "本質的な", answer: "intrinsic", hint: "9文字" },
-                { meaning: "外在的な", answer: "extrinsic", hint: "9文字" },
-                { meaning: "固有の", answer: "inherent", hint: "8文字" },
-                { meaning: "派生的な", answer: "derivative", hint: "10文字" },
-                { meaning: "優勢な", answer: "dominant", hint: "8文字" },
-                { meaning: "劣勢な", answer: "subordinate", hint: "11文字" },
-                { meaning: "顕著な", answer: "salient", hint: "7文字" },
-                { meaning: "微妙な", answer: "subtle", hint: "6文字" },
-                { meaning: "明白な", answer: "manifest", hint: "8文字" },
-                { meaning: "潜在的な", answer: "latent", hint: "6文字" },
-                { meaning: "明示的な", answer: "overt", hint: "5文字" },
-                { meaning: "暗示的な", answer: "covert", hint: "6文字" },
-                { meaning: "直接的な", answer: "direct", hint: "6文字" },
-                { meaning: "間接的な", answer: "indirect", hint: "8文字" },
-                { meaning: "積極的な", answer: "proactive", hint: "9文字" },
-                { meaning: "受動的な", answer: "passive", hint: "7文字" },
-                
-                // 上級名詞
-                { meaning: "矛盾", answer: "contradiction", hint: "13文字" },
-                { meaning: "現象", answer: "phenomenon", hint: "10文字" },
-                { meaning: "仮説", answer: "hypothesis", hint: "10文字" },
-                { meaning: "推論", answer: "inference", hint: "9文字" },
-                { meaning: "含意", answer: "implication", hint: "11文字" },
-                { meaning: "前提", answer: "premise", hint: "7文字" },
-                { meaning: "結論", answer: "conclusion", hint: "10文字" },
-                { meaning: "根拠", answer: "rationale", hint: "9文字" },
-                { meaning: "基準", answer: "criterion", hint: "9文字" },
-                { meaning: "範囲", answer: "scope", hint: "5文字" },
-                { meaning: "領域", answer: "domain", hint: "6文字" },
-                { meaning: "側面", answer: "aspect", hint: "6文字" },
-                { meaning: "次元", answer: "dimension", hint: "9文字" },
-                { meaning: "視点", answer: "perspective", hint: "11文字" },
-                { meaning: "文脈", answer: "context", hint: "7文字" },
-                { meaning: "枠組み", answer: "framework", hint: "9文字" },
-                { meaning: "パラダイム", answer: "paradigm", hint: "8文字" },
-                { meaning: "メカニズム", answer: "mechanism", hint: "9文字" },
-                { meaning: "動力学", answer: "dynamics", hint: "8文字" },
-                { meaning: "相互作用", answer: "interaction", hint: "11文字" },
-                { meaning: "統合", answer: "integration", hint: "11文字" },
-                { meaning: "分離", answer: "segregation", hint: "11文字" },
-                { meaning: "統一", answer: "unification", hint: "11文字" },
-                { meaning: "分化", answer: "differentiation", hint: "15文字" },
-                { meaning: "進化", answer: "evolution", hint: "9文字" },
-                { meaning: "革命", answer: "revolution", hint: "10文字" },
-                { meaning: "改革", answer: "reform", hint: "6文字" },
-                { meaning: "変革", answer: "transformation", hint: "14文字" },
-                { meaning: "革新", answer: "innovation", hint: "10文字" },
-                { meaning: "保守", answer: "conservation", hint: "12文字" },
-                { meaning: "伝統", answer: "tradition", hint: "9文字" },
-                { meaning: "慣習", answer: "convention", hint: "10文字" },
-                { meaning: "規範", answer: "norm", hint: "4文字" },
-                { meaning: "逸脱", answer: "deviation", hint: "9文字" },
-                { meaning: "異常", answer: "anomaly", hint: "7文字" },
-                { meaning: "例外", answer: "exception", hint: "9文字" },
-                { meaning: "規則", answer: "regulation", hint: "10文字" },
-                { meaning: "原理", answer: "principle", hint: "9文字" },
-                { meaning: "法則", answer: "law", hint: "3文字" },
-                { meaning: "定理", answer: "theorem", hint: "7文字" },
-                
-                // 上級動詞
-                { meaning: "強調する", answer: "emphasize", hint: "9文字" },
-                { meaning: "実施する", answer: "implement", hint: "9文字" },
-                { meaning: "正当化する", answer: "justify", hint: "7文字" },
-                { meaning: "操作する", answer: "manipulate", hint: "10文字" },
-                { meaning: "緩和する", answer: "mitigate", hint: "8文字" },
-                { meaning: "促進する", answer: "facilitate", hint: "10文字" },
-                { meaning: "阻害する", answer: "inhibit", hint: "7文字" },
-                { meaning: "統合する", answer: "integrate", hint: "9文字" },
-                { meaning: "分離する", answer: "segregate", hint: "9文字" },
-                { meaning: "統一する", answer: "unify", hint: "5文字" },
-                { meaning: "多様化する", answer: "diversify", hint: "9文字" },
-                { meaning: "標準化する", answer: "standardize", hint: "11文字" },
-                { meaning: "一般化する", answer: "generalize", hint: "10文字" },
-                { meaning: "合成する", answer: "synthesize", hint: "10文字" },
-                { meaning: "分解する", answer: "decompose", hint: "9文字" },
-                { meaning: "変換する", answer: "transform", hint: "9文字" },
-                { meaning: "保存する", answer: "preserve", hint: "8文字" },
-                { meaning: "維持する", answer: "sustain", hint: "7文字" },
-                { meaning: "持続する", answer: "persist", hint: "7文字" },
-                { meaning: "永続させる", answer: "perpetuate", hint: "10文字" },
-                { meaning: "消滅させる", answer: "extinguish", hint: "10文字" },
-                { meaning: "根絶する", answer: "eradicate", hint: "9文字" },
-                { meaning: "排除する", answer: "eliminate", hint: "9文字" },
-                { meaning: "除去する", answer: "remove", hint: "6文字" },
-                { meaning: "抽出する", answer: "extract", hint: "7文字" },
-                { meaning: "挿入する", answer: "insert", hint: "6文字" },
-                { meaning: "注入する", answer: "inject", hint: "6文字" },
-                { meaning: "放出する", answer: "emit", hint: "4文字" },
-                { meaning: "吸収する", answer: "absorb", hint: "6文字" },
-                { meaning: "反射する", answer: "reflect", hint: "7文字" },
-                { meaning: "屈折する", answer: "refract", hint: "7文字" },
-                { meaning: "拡散する", answer: "diffuse", hint: "7文字" },
-                { meaning: "集中する", answer: "concentrate", hint: "11文字" },
-                { meaning: "分散する", answer: "disperse", hint: "8文字" },
-                { meaning: "収束する", answer: "converge", hint: "8文字" },
-                { meaning: "発散する", answer: "diverge", hint: "7文字" },
-                { meaning: "増幅する", answer: "amplify", hint: "7文字" },
-                { meaning: "減衰する", answer: "attenuate", hint: "9文字" },
-                { meaning: "強化する", answer: "reinforce", hint: "9文字" },
-                { meaning: "弱体化する", answer: "undermine", hint: "9文字" },
-            ]
+            // むずかしい：英検準1級(4問) → 1級前半(3問) → 1級後半(3問)
+            hard: {
+                preGrade1: [ // 英検準1級レベル
+                    { meaning: "適度な", answer: "moderate", hint: "8文字" },
+                    { meaning: "過度の", answer: "excessive", hint: "9文字" },
+                    { meaning: "柔軟な", answer: "flexible", hint: "8文字" },
+                    { meaning: "厳格な", answer: "strict", hint: "6文字" },
+                    { meaning: "寛大な", answer: "generous", hint: "8文字" },
+                    { meaning: "厳しい", answer: "severe", hint: "6文字" },
+                    { meaning: "極端な", answer: "extreme", hint: "7文字" },
+                    { meaning: "信頼できる", answer: "reliable", hint: "8文字" },
+                    { meaning: "適切な", answer: "suitable", hint: "8文字" },
+                    { meaning: "利用可能な", answer: "available", hint: "9文字" },
+                    { meaning: "促進する", answer: "promote", hint: "7文字" },
+                    { meaning: "妨げる", answer: "prevent", hint: "7文字" },
+                    { meaning: "許可する", answer: "permit", hint: "6文字" },
+                    { meaning: "禁止する", answer: "forbid", hint: "6文字" },
+                    { meaning: "要求する", answer: "require", hint: "7文字" },
+                    { meaning: "提供する", answer: "provide", hint: "7文字" },
+                    { meaning: "戦略", answer: "strategy", hint: "8文字" },
+                    { meaning: "技術", answer: "technique", hint: "9文字" },
+                    { meaning: "手順", answer: "procedure", hint: "9文字" },
+                    { meaning: "過程", answer: "process", hint: "7文字" },
+                ],
+                grade1Early: [ // 英検1級前半レベル
+                    { meaning: "曖昧な", answer: "ambiguous", hint: "9文字" },
+                    { meaning: "洗練された", answer: "sophisticated", hint: "13文字" },
+                    { meaning: "包括的な", answer: "comprehensive", hint: "13文字" },
+                    { meaning: "議論の余地がある", answer: "controversial", hint: "13文字" },
+                    { meaning: "顕著な", answer: "prominent", hint: "9文字" },
+                    { meaning: "一時的な", answer: "transient", hint: "9文字" },
+                    { meaning: "永続的な", answer: "perpetual", hint: "9文字" },
+                    { meaning: "冗長な", answer: "redundant", hint: "9文字" },
+                    { meaning: "簡潔な", answer: "concise", hint: "7文字" },
+                    { meaning: "徹底的な", answer: "thorough", hint: "8文字" },
+                    { meaning: "強調する", answer: "emphasize", hint: "9文字" },
+                    { meaning: "実施する", answer: "implement", hint: "9文字" },
+                    { meaning: "正当化する", answer: "justify", hint: "7文字" },
+                    { meaning: "操作する", answer: "manipulate", hint: "10文字" },
+                    { meaning: "緩和する", answer: "mitigate", hint: "8文字" },
+                    { meaning: "矛盾", answer: "contradiction", hint: "13文字" },
+                    { meaning: "現象", answer: "phenomenon", hint: "10文字" },
+                    { meaning: "仮説", answer: "hypothesis", hint: "10文字" },
+                    { meaning: "推論", answer: "inference", hint: "9文字" },
+                    { meaning: "含意", answer: "implication", hint: "11文字" },
+                ],
+                grade1Late: [ // 英検1級後半レベル
+                    { meaning: "前例のない", answer: "unprecedented", hint: "13文字" },
+                    { meaning: "遍在する", answer: "ubiquitous", hint: "10文字" },
+                    { meaning: "厳格な", answer: "rigorous", hint: "8文字" },
+                    { meaning: "敵対的な", answer: "hostile", hint: "7文字" },
+                    { meaning: "友好的な", answer: "amicable", hint: "8文字" },
+                    { meaning: "自律的な", answer: "autonomous", hint: "10文字" },
+                    { meaning: "従属的な", answer: "subordinate", hint: "11文字" },
+                    { meaning: "体系的な", answer: "systematic", hint: "10文字" },
+                    { meaning: "断片的な", answer: "fragmentary", hint: "11文字" },
+                    { meaning: "顕在的な", answer: "explicit", hint: "8文字" },
+                    { meaning: "促進する", answer: "facilitate", hint: "10文字" },
+                    { meaning: "阻害する", answer: "inhibit", hint: "7文字" },
+                    { meaning: "統合する", answer: "integrate", hint: "9文字" },
+                    { meaning: "分離する", answer: "segregate", hint: "9文字" },
+                    { meaning: "多様化する", answer: "diversify", hint: "9文字" },
+                    { meaning: "標準化する", answer: "standardize", hint: "11文字" },
+                    { meaning: "前提", answer: "premise", hint: "7文字" },
+                    { meaning: "基準", answer: "criterion", hint: "9文字" },
+                    { meaning: "視点", answer: "perspective", hint: "11文字" },
+                    { meaning: "パラダイム", answer: "paradigm", hint: "8文字" },
+                ]
+            }
         };
 
         // ゲーム変数
         let currentDifficulty = 'normal';
         let currentQuestionIndex = 0;
         let correctCount = 0;
-        let totalScore = 0;
         let gameQuestions = [];
         let timer = null;
         let timeLeft = 20;
         let timeLimit = 20;
         let answeredQuestions = [];
         let currentAnswer = '';
-        let currentCursorPos = 0;
         let skipsRemaining = 1;
 
         // 音声関連
@@ -1134,31 +1567,45 @@
             }
         }
 
-        // BGM再生
-        function playBGM() {
+        // メニュー用BGM（穏やかで期待感のある曲）
+        function playMenuBGM() {
             initAudio();
             stopBGM();
 
-            // シンプルなメロディ（明るい雰囲気）
+            // 明るく期待感のあるメロディ
             const melody = [
-                { freq: 523.25, start: 0, duration: 0.3 },    // C5
-                { freq: 659.25, start: 0.3, duration: 0.3 },  // E5
-                { freq: 783.99, start: 0.6, duration: 0.3 },  // G5
-                { freq: 659.25, start: 0.9, duration: 0.3 },  // E5
-                { freq: 523.25, start: 1.2, duration: 0.4 },  // C5
+                // フレーズ1: 上昇する期待感
+                { freq: 523.25, start: 0, duration: 0.4 },      // C5
+                { freq: 587.33, start: 0.4, duration: 0.4 },    // D5
+                { freq: 659.25, start: 0.8, duration: 0.4 },    // E5
+                { freq: 783.99, start: 1.2, duration: 0.6 },    // G5
+                
+                // フレーズ2: 優しく下降
+                { freq: 659.25, start: 1.9, duration: 0.4 },    // E5
+                { freq: 587.33, start: 2.3, duration: 0.4 },    // D5
+                { freq: 523.25, start: 2.7, duration: 0.6 },    // C5
+            ];
+
+            // ベースライン（安定感）
+            const bassline = [
+                { freq: 261.63, start: 0, duration: 0.8 },      // C4
+                { freq: 293.66, start: 0.8, duration: 0.8 },    // D4
+                { freq: 329.63, start: 1.6, duration: 0.8 },    // E4
+                { freq: 261.63, start: 2.4, duration: 0.9 },    // C4
             ];
 
             const now = audioContext.currentTime;
             
+            // メロディ再生
             melody.forEach(note => {
                 const osc = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
-                osc.type = 'sine';
+                osc.type = 'sine'; // 優しい音色
                 osc.frequency.value = note.freq;
                 
                 gainNode.gain.setValueAtTime(0, now + note.start);
-                gainNode.gain.linearRampToValueAtTime(0.3, now + note.start + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0.2, now + note.start + 0.01);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
                 
                 osc.connect(gainNode);
@@ -1170,12 +1617,117 @@
                 bgmOscillators.push(osc);
             });
 
-            // ループ再生
+            // ベースライン再生
+            bassline.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'triangle'; // 柔らかい低音
+                osc.frequency.value = note.freq;
+                
+                gainNode.gain.setValueAtTime(0, now + note.start);
+                gainNode.gain.linearRampToValueAtTime(0.1, now + note.start + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime( 0.01, now + note.start + note.duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(bgmGainNode);
+                
+                osc.start(now + note.start);
+                osc.stop(now + note.start + note.duration);
+                
+                bgmOscillators.push(osc);
+            });
+
+            // ループ再生（ゆったりとしたテンポ）
+            setTimeout(() => {
+                if (bgmOscillators.length > 0) {
+                    playMenuBGM();
+                }
+            }, 3300);
+        }
+        function playBGM() {
+            initAudio();
+            stopBGM();
+
+            // 緊張感のあるメロディ（短調・スリリング）
+            const melody = [
+                // フレーズ1: 緊迫感のある上昇
+                { freq: 329.63, start: 0, duration: 0.15 },     // E4
+                { freq: 392.00, start: 0.15, duration: 0.15 },  // G4
+                { freq: 440.00, start: 0.3, duration: 0.15 },   // A4
+                { freq: 493.88, start: 0.45, duration: 0.2 },   // B4
+                
+                // フレーズ2: 反復で緊張を高める
+                { freq: 523.25, start: 0.7, duration: 0.15 },   // C5
+                { freq: 493.88, start: 0.85, duration: 0.15 },  // B4
+                { freq: 440.00, start: 1.0, duration: 0.15 },   // A4
+                { freq: 493.88, start: 1.15, duration: 0.2 },   // B4
+                
+                // フレーズ3: 高音で緊迫感
+                { freq: 587.33, start: 1.4, duration: 0.15 },   // D5
+                { freq: 523.25, start: 1.55, duration: 0.15 },  // C5
+                { freq: 493.88, start: 1.7, duration: 0.2 },    // B4
+            ];
+
+            // ベースライン（低音でドキドキ感）
+            const bassline = [
+                { freq: 164.81, start: 0, duration: 0.3 },      // E3
+                { freq: 146.83, start: 0.4, duration: 0.3 },    // D3
+                { freq: 164.81, start: 0.8, duration: 0.3 },    // E3
+                { freq: 146.83, start: 1.2, duration: 0.3 },    // D3
+                { freq: 164.81, start: 1.6, duration: 0.3 },    // E3
+            ];
+
+            const now = audioContext.currentTime;
+            
+            // メロディ再生
+            melody.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'triangle'; // より緊張感のある音色
+                osc.frequency.value = note.freq;
+                
+                gainNode.gain.setValueAtTime(0, now + note.start);
+                gainNode.gain.linearRampToValueAtTime(0.25, now + note.start + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(bgmGainNode);
+                
+                osc.start(now + note.start);
+                osc.stop(now + note.start + note.duration);
+                
+                bgmOscillators.push(osc);
+            });
+
+            // ベースライン再生（ドキドキ感）
+            bassline.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'sawtooth'; // 重厚な低音
+                osc.frequency.value = note.freq;
+                
+                gainNode.gain.setValueAtTime(0, now + note.start);
+                gainNode.gain.linearRampToValueAtTime(0.15, now + note.start + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(bgmGainNode);
+                
+                osc.start(now + note.start);
+                osc.stop(now + note.start + note.duration);
+                
+                bgmOscillators.push(osc);
+            });
+
+            // ループ再生（速めのテンポで緊迫感）
             setTimeout(() => {
                 if (bgmOscillators.length > 0) {
                     playBGM();
                 }
-            }, 1600);
+            }, 1900); // より速いループ
         }
 
         // BGM停止
@@ -1323,24 +1875,153 @@
             osc2.stop(now + 1.0);
         }
 
-        // ミュート切り替え
+        // 失敗アニメーション表示
+        function showFailed(message, correctAnswer) {
+            const notification = document.getElementById('failed-notification');
+            const text = document.querySelector('.failed-text');
+            const answer = document.querySelector('.failed-answer');
+            
+            // 確実に初期位置を中央に設定
+            notification.style.transform = 'translate(-50%, -50%) scale(0)';
+            notification.style.visibility = 'hidden';
+            notification.style.opacity = '0';
+            
+            text.textContent = message;
+            answer.textContent = `正解: ${correctAnswer}`;
+            
+            // 強制的にリフロー（レンダリングを確定）
+            notification.offsetHeight;
+            
+            // アニメーション開始
+            notification.classList.add('show');
+            
+            // 効果音
+            playFailedSound();
+            
+            // 1.8秒後に非表示（フェードアウトアニメーション込み）
+            setTimeout(() => {
+                notification.classList.remove('show');
+                // リセット
+                notification.style.transform = 'translate(-50%, -50%) scale(0)';
+                notification.style.visibility = 'hidden';
+                notification.style.opacity = '0';
+            }, 1800);
+        }
+
+        // 失敗音（時間切れ・スキップ用）
+        function playFailedSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            
+            // 下降する不協和音
+            [440, 370, 311].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'square';
+                osc.frequency.value = freq;
+                
+                gainNode.gain.setValueAtTime(0, now + i * 0.15);
+                gainNode.gain.linearRampToValueAtTime(0.15, now + i * 0.15 + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.4);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc.start(now + i * 0.15);
+                osc.stop(now + i * 0.15 + 0.4);
+            });
+        }
+
+        // レベルアップ通知を表示
+        function showLevelUp(levelName) {
+            const notification = document.getElementById('level-up-notification');
+            const text = document.querySelector('.level-up-text');
+            
+            text.textContent = `レベルアップ！\n${levelName}`;
+            notification.classList.add('show');
+            
+            // パーティクルエフェクトを追加
+            createParticles(notification);
+            
+            // 効果音
+            playLevelUpSound();
+            
+            // 2秒後に非表示
+            setTimeout(() => {
+                notification.classList.remove('show');
+                // パーティクルをクリア
+                const particlesContainer = notification.querySelector('.particles');
+                if (particlesContainer) {
+                    particlesContainer.remove();
+                }
+            }, 2000);
+        }
+
+        // パーティクルエフェクトを生成
+        function createParticles(container) {
+            const particlesContainer = document.createElement('div');
+            particlesContainer.className = 'particles';
+            
+            // 20個のパーティクルを生成
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.setProperty('--x-offset', (Math.random() - 0.5) * 200 + 'px');
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+            
+            container.appendChild(particlesContainer);
+        }
+
+        // レベルアップ音
+        function playLevelUpSound() {
+            if (!audioContext || isMuted) return;
+            
+            const now = audioContext.currentTime;
+            
+            // 上昇音階
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                gainNode.gain.setValueAtTime(0, now + i * 0.1);
+                gainNode.gain.linearRampToValueAtTime(0.2, now + i * 0.1 + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.2);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.2);
+            });
+        }
         function toggleMute() {
             isMuted = !isMuted;
-            const muteBtn = document.getElementById('mute-btn');
+            const muteBtn = document.getElementById('mute-btn-game');
             
-            if (isMuted) {
-                muteBtn.textContent = '🔇';
-                stopBGM();
-                if (audioContext) {
-                    audioContext.suspend();
-                }
-            } else {
-                muteBtn.textContent = '🔊';
-                if (audioContext) {
-                    audioContext.resume();
-                }
-                if (document.getElementById('game-area').classList.contains('hidden') === false) {
-                    playBGM();
+            if (muteBtn) {
+                if (isMuted) {
+                    muteBtn.textContent = '🔇';
+                    stopBGM();
+                    if (audioContext) {
+                        audioContext.suspend();
+                    }
+                } else {
+                    muteBtn.textContent = '🔊';
+                    if (audioContext) {
+                        audioContext.resume();
+                    }
+                    if (document.getElementById('game-area').classList.contains('hidden') === false) {
+                        playBGM();
+                    }
                 }
             }
         }
@@ -1354,6 +2035,8 @@
                 document.getElementById('game-area').classList.add('hidden');
                 document.getElementById('game-over').classList.remove('show');
                 document.getElementById('start-screen').classList.remove('hidden');
+                
+                playMenuBGM();
             }
         }
 
@@ -1413,8 +2096,13 @@
             }
         }
 
-        // キー入力処理
+        // キー入力処理（PC用のみ）
         function handleKeyInput(e) {
+            // inputフィールドからの入力の場合はスキップ
+            if (e.target.id === 'answer-input') {
+                return;
+            }
+
             const answerLength = gameQuestions[currentQuestionIndex].answer.length;
             const requiredInputLength = answerLength - 1; // 一文字目はヒントなので-1
             
@@ -1423,6 +2111,7 @@
                 if (currentAnswer.length > 0) {
                     currentAnswer = currentAnswer.slice(0, -1);
                     updateLetterBoxes();
+                    updateInputField();
                 }
             } else if (e.key === 'Enter') {
                 if (currentAnswer.length === requiredInputLength && !document.getElementById('submit-btn').disabled) {
@@ -1433,6 +2122,7 @@
                 if (currentAnswer.length < requiredInputLength) {
                     currentAnswer += e.key.toLowerCase();
                     updateLetterBoxes();
+                    updateInputField();
                     
                     // 全部入力したら自動的に回答
                     if (currentAnswer.length === requiredInputLength) {
@@ -1444,6 +2134,48 @@
                     }
                 }
             }
+        }
+
+        // モバイル入力フィールド更新
+        function updateInputField() {
+            const inputField = document.getElementById('answer-input');
+            inputField.value = currentAnswer;
+        }
+
+        // モバイル入力イベント処理
+        function handleMobileInput(e) {
+            const answerLength = gameQuestions[currentQuestionIndex].answer.length;
+            const requiredInputLength = answerLength - 1;
+            
+            // 現在の入力値から英字のみ抽出
+            const inputValue = e.target.value.toLowerCase().replace(/[^a-z]/g, '');
+            
+            // 入力値が変わった場合のみ更新
+            if (inputValue !== currentAnswer) {
+                // 入力を制限
+                if (inputValue.length <= requiredInputLength) {
+                    currentAnswer = inputValue;
+                    updateLetterBoxes();
+                    
+                    // 全部入力したら自動的に回答
+                    if (currentAnswer.length === requiredInputLength) {
+                        setTimeout(() => {
+                            if (!document.getElementById('submit-btn').disabled) {
+                                checkAnswer();
+                            }
+                        }, 300);
+                    }
+                }
+                
+                // inputフィールドの値を現在の答えに同期
+                e.target.value = currentAnswer;
+            }
+        }
+
+        // 文字ボックスクリックで入力フィールドにフォーカス
+        function focusInput() {
+            const inputField = document.getElementById('answer-input');
+            inputField.focus();
         }
 
         // ユーティリティ関数
@@ -1470,34 +2202,46 @@
             currentDifficulty = difficulty;
             currentQuestionIndex = 0;
             correctCount = 0;
-            totalScore = 0;
             answeredQuestions = [];
             skipsRemaining = 1;
 
-            // 音声初期化とBGM開始
+            // メニューBGMを停止してゲームBGMを開始
+            stopBGM();
             initAudio();
             playBGM();
 
             // 難易度に応じた設定（全て20秒に統一）
             timeLimit = 20;
 
-            // 問題をシャッフルして10問選択
-            gameQuestions = shuffleArray(questionBank[difficulty]).slice(0, 10);
+            // 段階的な問題選択（4問 + 3問 + 3問 = 10問）
+            gameQuestions = [];
+            
+            if (difficulty === 'easy') {
+                // 英検5級(4問) → 4級(3問) → 3級(3問)
+                const level1 = shuffleArray(questionBank.easy.grade5).slice(0, 4);
+                const level2 = shuffleArray(questionBank.easy.grade4).slice(0, 3);
+                const level3 = shuffleArray(questionBank.easy.grade3).slice(0, 3);
+                gameQuestions = [...level1, ...level2, ...level3];
+            } else if (difficulty === 'normal') {
+                // 準2級(4問) → 2級前半(3問) → 2級後半(3問)
+                const level1 = shuffleArray(questionBank.normal.preGrade2).slice(0, 4);
+                const level2 = shuffleArray(questionBank.normal.grade2Early).slice(0, 3);
+                const level3 = shuffleArray(questionBank.normal.grade2Late).slice(0, 3);
+                gameQuestions = [...level1, ...level2, ...level3];
+            } else if (difficulty === 'hard') {
+                // 準1級(4問) → 1級前半(3問) → 1級後半(3問)
+                const level1 = shuffleArray(questionBank.hard.preGrade1).slice(0, 4);
+                const level2 = shuffleArray(questionBank.hard.grade1Early).slice(0, 3);
+                const level3 = shuffleArray(questionBank.hard.grade1Late).slice(0, 3);
+                gameQuestions = [...level1, ...level2, ...level3];
+            }
 
             // 画面切り替え
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-area').classList.remove('hidden');
             document.getElementById('game-over').classList.remove('show');
 
-            updateScoreBoard();
             loadQuestion();
-        }
-
-        // スコアボード更新
-        function updateScoreBoard() {
-            document.getElementById('question-count').textContent = `${currentQuestionIndex + 1}/10`;
-            document.getElementById('correct-count').textContent = correctCount;
-            document.getElementById('score').textContent = totalScore;
         }
 
         // タイマー開始
@@ -1507,11 +2251,17 @@
             timeLeft = timeLimit;
             document.getElementById('timer').textContent = timeLeft;
             document.getElementById('timer').classList.remove('warning');
+            document.getElementById('timer').style.display = 'none'; // 初期は非表示
             document.getElementById('meaning').classList.remove('urgent');
 
             timer = setInterval(() => {
                 timeLeft--;
                 document.getElementById('timer').textContent = timeLeft;
+
+                // 10秒以下になったらタイマーを表示
+                if (timeLeft <= 10) {
+                    document.getElementById('timer').style.display = 'block';
+                }
 
                 if (timeLeft === 10) {
                     document.getElementById('meaning').classList.add('urgent');
@@ -1532,25 +2282,14 @@
 
         // 時間切れ
         function timeUp() {
-            const resultDiv = document.getElementById('result');
             const correctAnswer = gameQuestions[currentQuestionIndex].answer;
-            const answerLength = correctAnswer.length;
-            
-            resultDiv.className = 'result incorrect';
-            resultDiv.innerHTML = `⏰ 時間切れ！ゲーム終了<br><span class="correct-answer">正解: ${correctAnswer}</span>`;
             
             document.getElementById('answer-input').disabled = true;
             document.getElementById('submit-btn').disabled = true;
             document.getElementById('skip-btn').disabled = true;
 
-            // 正解を文字ボックスに表示
-            for (let i = 0; i < answerLength; i++) {
-                const box = document.getElementById(`letter-box-${i}`);
-                box.classList.add('incorrect');
-                box.textContent = correctAnswer[i];
-            }
-
-            playTimeUpSound();
+            // 失敗アニメーション表示
+            showFailed('⏰ 時間切れ！', correctAnswer);
 
             answeredQuestions.push({
                 question: gameQuestions[currentQuestionIndex].meaning,
@@ -1560,10 +2299,10 @@
                 isTimeout: true
             });
 
-            // 時間切れの場合は即座にゲーム終了
+            // アニメーション終了後にゲーム終了
             setTimeout(() => {
                 endGame();
-            }, 2500);
+            }, 2000);
         }
 
         // 問題読み込み
@@ -1574,11 +2313,58 @@
             document.getElementById('meaning').classList.remove('urgent');
             document.getElementById('hint').textContent = `ヒント: ${question.hint}`;
             
+            // レベル名を判定（レベルアップ通知用のみ）
+            let levelName = '';
+            
+            if (currentDifficulty === 'easy') {
+                if (currentQuestionIndex >= 7) {
+                    levelName = '英検3級レベル';
+                } else if (currentQuestionIndex >= 4) {
+                    levelName = '英検4級レベル';
+                } else {
+                    levelName = '英検5級レベル';
+                }
+            } else if (currentDifficulty === 'normal') {
+                if (currentQuestionIndex >= 7) {
+                    levelName = '英検2級後半レベル';
+                } else if (currentQuestionIndex >= 4) {
+                    levelName = '英検2級前半レベル';
+                } else {
+                    levelName = '英検準2級レベル';
+                }
+            } else if (currentDifficulty === 'hard') {
+                if (currentQuestionIndex >= 7) {
+                    levelName = '英検1級後半レベル';
+                } else if (currentQuestionIndex >= 4) {
+                    levelName = '英検1級前半レベル';
+                } else {
+                    levelName = '英検準1級レベル';
+                }
+            }
+            
+            // レベルアップ通知（5問目と8問目）
+            if (currentQuestionIndex === 4 || currentQuestionIndex === 7) {
+                showLevelUp(levelName);
+                // 通知が消えるまで待ってから問題開始
+                setTimeout(() => {
+                    continueLoadQuestion();
+                }, 2200);
+            } else {
+                continueLoadQuestion();
+            }
+        }
+
+        // 問題読み込みを続行
+        function continueLoadQuestion() {
             // 文字ボックスを生成
+            const question = gameQuestions[currentQuestionIndex];
             createLetterBoxes(question.answer.length);
             
-            document.getElementById('answer-input').value = '';
-            document.getElementById('answer-input').disabled = false;
+            const inputField = document.getElementById('answer-input');
+            inputField.value = '';
+            inputField.disabled = false;
+            inputField.focus();
+            
             document.getElementById('submit-btn').disabled = false;
             document.getElementById('result').style.display = 'none';
             document.getElementById('result').className = 'result';
@@ -1594,9 +2380,6 @@
                 skipCount.textContent = '(使用済み)';
             }
 
-            // キーボードフォーカスを設定
-            document.getElementById('letter-boxes').focus();
-
             startTimer();
         }
 
@@ -1608,22 +2391,14 @@
             const resultDiv = document.getElementById('result');
             const answerLength = correctAnswer.length;
 
-            let isCorrect = false;
-            let points = 0;
-
             if (userAnswer === correctAnswer) {
-                isCorrect = true;
                 correctCount++;
                 
                 // タイマーを停止
                 if (timer) clearInterval(timer);
                 
-                // 残り時間に応じてボーナスポイント
-                points = 10 + Math.floor(timeLeft / 2);
-                totalScore += points;
-                
                 resultDiv.className = 'result correct';
-                resultDiv.textContent = `🎉 正解！ +${points}点`;
+                resultDiv.textContent = `🎉 正解！`;
                 
                 // 全ての文字ボックスを正解表示
                 for (let i = 0; i < answerLength; i++) {
@@ -1639,11 +2414,8 @@
                     question: gameQuestions[currentQuestionIndex].meaning,
                     userAnswer: userAnswer,
                     correctAnswer: correctAnswer,
-                    isCorrect: isCorrect,
-                    points: points
+                    isCorrect: true
                 });
-
-                updateScoreBoard();
 
                 setTimeout(() => {
                     nextQuestion();
@@ -1665,6 +2437,7 @@
                 setTimeout(() => {
                     currentAnswer = '';
                     updateLetterBoxes();
+                    updateInputField();
                     
                     // incorrect クラスを削除（一文字目はスキップ）
                     for (let i = 1; i < answerLength; i++) {
@@ -1672,6 +2445,9 @@
                     }
                     
                     resultDiv.style.display = 'none';
+                    
+                    // 入力フィールドにフォーカス
+                    document.getElementById('answer-input').focus();
                     
                     // タイマーは継続（再開しない）
                 }, 1000);
@@ -1690,21 +2466,14 @@
 
             const resultDiv = document.getElementById('result');
             const correctAnswer = gameQuestions[currentQuestionIndex].answer;
-            const answerLength = correctAnswer.length;
-            
+
             resultDiv.className = 'result incorrect';
-            resultDiv.innerHTML = `スキップ<br><span class="correct-answer">正解: ${correctAnswer}</span>`;
+            resultDiv.innerHTML = `⏭️ スキップしました<br><span class="correct-answer">正解: ${correctAnswer}</span>`;
+            resultDiv.style.display = 'block';
 
             document.getElementById('answer-input').disabled = true;
             document.getElementById('submit-btn').disabled = true;
             document.getElementById('skip-btn').disabled = true;
-
-            // 正解を文字ボックスに表示
-            for (let i = 0; i < answerLength; i++) {
-                const box = document.getElementById(`letter-box-${i}`);
-                box.classList.add('incorrect');
-                box.textContent = correctAnswer[i];
-            }
 
             answeredQuestions.push({
                 question: gameQuestions[currentQuestionIndex].meaning,
@@ -1714,6 +2483,7 @@
                 isSkipped: true
             });
 
+            // 2秒後に次の問題へ
             setTimeout(() => {
                 nextQuestion();
             }, 2000);
@@ -1798,13 +2568,6 @@
             } else {
                 incorrectWordsList.innerHTML = '<div class="no-words">間違えた単語はありません</div>';
             }
-
-            // LocalStorageにベストスコアを保存
-            const bestKey = `best_${currentDifficulty}`;
-            const currentBest = localStorage.getItem(bestKey) || 0;
-            if (totalScore > currentBest) {
-                localStorage.setItem(bestKey, totalScore);
-            }
         }
 
         // イベントリスナー
@@ -1818,16 +2581,39 @@
         document.getElementById('home-btn').addEventListener('click', () => {
             document.getElementById('game-over').classList.remove('show');
             document.getElementById('start-screen').classList.remove('hidden');
+            stopBGM();
+            playMenuBGM();
         });
 
         document.getElementById('back-home-game-btn').addEventListener('click', goBackHome);
 
-        // キーボード入力を処理
+        // キーボード入力を処理（PC用）
         document.addEventListener('keydown', (e) => {
             // ゲーム画面が表示されている時のみ処理
             if (!document.getElementById('game-area').classList.contains('hidden')) {
                 handleKeyInput(e);
             }
+        });
+
+        // モバイル入力を処理
+        document.getElementById('answer-input').addEventListener('input', handleMobileInput);
+
+        // 文字ボックスクリック/タップで入力フィールドにフォーカス
+        document.getElementById('letter-boxes').addEventListener('click', focusInput);
+        document.getElementById('letter-boxes').addEventListener('touchstart', focusInput);
+
+        // ページ読み込み時にメニューBGMを開始（初回クリック時）
+        let menuBGMStarted = false;
+        window.addEventListener('load', () => {
+            // ユーザーインタラクション後に音声を再生（ブラウザのポリシー対応）
+            const startMenuBGM = () => {
+                if (!menuBGMStarted && !audioContext && document.getElementById('start-screen').classList.contains('hidden') === false) {
+                    menuBGMStarted = true;
+                    playMenuBGM();
+                    document.body.removeEventListener('click', startMenuBGM);
+                }
+            };
+            document.body.addEventListener('click', startMenuBGM);
         });
     </script>
 </body>
