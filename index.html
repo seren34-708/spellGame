@@ -1178,7 +1178,29 @@
             }
             
             .title {
-                font-size: 24px;
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            /* ゲーム画面のタイトルを非表示にして重なりを防ぐ */
+            #game-area .title {
+                display: none;
+            }
+
+            /* ボタンのサイズと位置調整 */
+            .home-btn-game {
+                top: 10px;
+                left: 10px;
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .mute-btn-game {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
             }
             
             .meaning {
@@ -1555,6 +1577,7 @@
         let audioContext = null;
         let bgmGainNode = null;
         let bgmOscillators = [];
+        let bgmTimeout = null;  // BGMループ用のタイマーID
         let isMuted = false;
 
         // AudioContextの初期化
@@ -1639,7 +1662,7 @@
             });
 
             // ループ再生（ゆったりとしたテンポ）
-            setTimeout(() => {
+            bgmTimeout = setTimeout(() => {
                 if (bgmOscillators.length > 0) {
                     playMenuBGM();
                 }
@@ -1723,7 +1746,7 @@
             });
 
             // ループ再生（速めのテンポで緊迫感）
-            setTimeout(() => {
+            bgmTimeout = setTimeout(() => {
                 if (bgmOscillators.length > 0) {
                     playBGM();
                 }
@@ -1732,6 +1755,13 @@
 
         // BGM停止
         function stopBGM() {
+            // タイマーをクリア
+            if (bgmTimeout) {
+                clearTimeout(bgmTimeout);
+                bgmTimeout = null;
+            }
+            
+            // オシレーターを停止
             bgmOscillators.forEach(osc => {
                 try {
                     osc.stop();
@@ -2208,7 +2238,15 @@
             // メニューBGMを停止してゲームBGMを開始
             stopBGM();
             initAudio();
-            playBGM();
+            
+            // モバイルブラウザ対応: AudioContextを確実に再開
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    playBGM();
+                });
+            } else {
+                playBGM();
+            }
 
             // 難易度に応じた設定（全て20秒に統一）
             timeLimit = 20;
@@ -2609,11 +2647,14 @@
             const startMenuBGM = () => {
                 if (!menuBGMStarted && !audioContext && document.getElementById('start-screen').classList.contains('hidden') === false) {
                     menuBGMStarted = true;
+                    initAudio(); // AudioContextを初期化
                     playMenuBGM();
                     document.body.removeEventListener('click', startMenuBGM);
+                    document.body.removeEventListener('touchstart', startMenuBGM);
                 }
             };
             document.body.addEventListener('click', startMenuBGM);
+            document.body.addEventListener('touchstart', startMenuBGM); // モバイル対応
         });
     </script>
 </body>
