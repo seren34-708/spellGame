@@ -13,9 +13,13 @@
 
         body {
             font-family: 'Arial', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            background: 
+                linear-gradient(to bottom, 
+                    #87CEEB 0%,      /* 空の青 */
+                    #B0E0E6 30%,     /* 明るい青 */
+                    #90EE90 60%,     /* 草原の緑 */
+                    #7CB342 100%     /* 濃い緑 */
+                );
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -25,46 +29,105 @@
             overflow-x: hidden;
         }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* 雲のエフェクト */
+        body::before {
+            content: '☁️  ☁️    ☁️     ☁️  ☁️';
+            position: fixed;
+            top: 10%;
+            left: 0;
+            width: 200%;
+            font-size: 60px;
+            opacity: 0.7;
+            pointer-events: none;
+            animation: cloudFloat 40s linear infinite;
+            white-space: nowrap;
         }
 
-        /* 背景の装飾パーティクル */
-        body::before {
+        @keyframes cloudFloat {
+            0% { 
+                transform: translateX(-50%);
+            }
+            100% { 
+                transform: translateX(0%);
+            }
+        }
+
+        /* 草のレイヤー1（下部） */
+        body::after {
             content: '';
             position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 150px;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+                linear-gradient(to bottom, transparent 0%, rgba(76, 175, 80, 0.3) 100%);
+            background-repeat: repeat-x;
             pointer-events: none;
-            animation: float 20s ease-in-out infinite;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+        /* 草を追加するための追加スタイル */
+        .grass-layer-1,
+        .grass-layer-2,
+        .grass-layer-3 {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+            font-size: 40px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .grass-layer-1 {
+            z-index: 1;
+            opacity: 0.8;
+            animation: grassSway1 3s ease-in-out infinite;
+        }
+
+        .grass-layer-2 {
+            z-index: 2;
+            opacity: 0.9;
+            animation: grassSway2 2.5s ease-in-out infinite 0.5s;
+        }
+
+        .grass-layer-3 {
+            z-index: 3;
+            opacity: 1;
+            animation: grassSway3 3.5s ease-in-out infinite 1s;
+        }
+
+        @keyframes grassSway1 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-3px) rotate(1deg); }
+        }
+
+        @keyframes grassSway2 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(-1deg); }
+        }
+
+        @keyframes grassSway3 {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-4px) rotate(0.5deg); }
         }
 
         .game-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
+            background: 
+                linear-gradient(135deg, rgba(240, 230, 210, 0.95) 0%, rgba(230, 220, 200, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             padding: 50px;
             box-shadow: 
-                0 30px 90px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-                0 10px 40px rgba(102, 126, 234, 0.2);
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                inset 0 0 0 3px rgba(139, 69, 19, 0.3),
+                0 0 0 6px rgba(139, 69, 19, 0.2);
             max-width: 700px;
             width: 100%;
             position: relative;
             animation: containerAppear 0.6s ease-out;
+            border: 3px solid #8b4513;
         }
 
         @keyframes containerAppear {
@@ -78,23 +141,29 @@
             }
         }
 
-        .game-container::before {
-            content: '';
+        /* 装飾的な武器（下側に配置） */
+        .game-container::before,
+        .game-container::after {
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
-            border-radius: 30px;
-            z-index: -1;
-            opacity: 0.3;
-            filter: blur(20px);
+            font-size: 35px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+            z-index: 0;
+            bottom: 15px;
+        }
+
+        .game-container::before {
+            content: '⚔️';
+            left: 20px;
+        }
+
+        .game-container::after {
+            content: '🛡️';
+            right: 20px;
         }
 
         .title {
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -1338,6 +1407,12 @@
             .game-container {
                 padding: 20px;
             }
+
+            /* 装飾を非表示（スペースがないため） */
+            .game-container::before,
+            .game-container::after {
+                display: none;
+            }
             
             .title {
                 font-size: 28px;
@@ -1457,6 +1532,11 @@
     </style>
 </head>
 <body>
+    <!-- 草レイヤー -->
+    <div class="grass-layer-1">🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿</div>
+    <div class="grass-layer-2">🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱</div>
+    <div class="grass-layer-3">🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾🌱🌿🌾</div>
+
     <div class="game-container">
         <div class="title">🎮 VocaDash</div>
 
@@ -1522,7 +1602,7 @@
 
         <!-- ゲームオーバー画面 -->
         <div id="game-over" class="game-over">
-            <h2>ゲーム終了！</h2>
+            <h2>🏰 冒険完了！</h2>
             <div class="rank-display" id="rank-display"></div>
             <div class="final-score" id="final-score">0 / 10</div>
             
@@ -1535,11 +1615,11 @@
 
             <div class="word-results">
                 <div class="correct-words-section">
-                    <h3>✅ 正解した単語</h3>
+                    <h3>⚔️ 討伐成功</h3>
                     <div id="correct-words-list" class="word-list"></div>
                 </div>
                 <div class="incorrect-words-section">
-                    <h3>❌ 間違えた単語</h3>
+                    <h3>💀 討伐失敗</h3>
                     <div id="incorrect-words-list" class="word-list"></div>
                 </div>
             </div>
@@ -1792,45 +1872,54 @@
             }
         }
 
-        // メニュー用BGM（穏やかで期待感のある曲）
+        // メニュー用BGM（RPGの町・酒場風）
         function playMenuBGM() {
             initAudio();
             stopBGM();
 
-            // 明るく期待感のあるメロディ
+            // RPG風のメロディ（ファンタジー・冒険の予感）
             const melody = [
-                // フレーズ1: 上昇する期待感
-                { freq: 523.25, start: 0, duration: 0.4 },      // C5
-                { freq: 587.33, start: 0.4, duration: 0.4 },    // D5
-                { freq: 659.25, start: 0.8, duration: 0.4 },    // E5
-                { freq: 783.99, start: 1.2, duration: 0.6 },    // G5
+                // フレーズ1: 勇壮なテーマ
+                { freq: 329.63, start: 0, duration: 0.5 },      // E4
+                { freq: 392.00, start: 0.5, duration: 0.5 },    // G4
+                { freq: 493.88, start: 1.0, duration: 0.6 },    // B4
+                { freq: 523.25, start: 1.6, duration: 0.8 },    // C5
                 
-                // フレーズ2: 優しく下降
-                { freq: 659.25, start: 1.9, duration: 0.4 },    // E5
-                { freq: 587.33, start: 2.3, duration: 0.4 },    // D5
-                { freq: 523.25, start: 2.7, duration: 0.6 },    // C5
+                // フレーズ2: 冒険の旋律
+                { freq: 587.33, start: 2.5, duration: 0.5 },    // D5
+                { freq: 523.25, start: 3.0, duration: 0.5 },    // C5
+                { freq: 493.88, start: 3.5, duration: 0.5 },    // B4
+                { freq: 392.00, start: 4.0, duration: 1.0 },    // G4
             ];
 
-            // ベースライン（安定感）
+            // ベースライン（力強い土台）
             const bassline = [
-                { freq: 261.63, start: 0, duration: 0.8 },      // C4
-                { freq: 293.66, start: 0.8, duration: 0.8 },    // D4
-                { freq: 329.63, start: 1.6, duration: 0.8 },    // E4
-                { freq: 261.63, start: 2.4, duration: 0.9 },    // C4
+                { freq: 164.81, start: 0, duration: 1.0 },      // E3
+                { freq: 196.00, start: 1.0, duration: 1.0 },    // G3
+                { freq: 130.81, start: 2.0, duration: 1.5 },    // C3
+                { freq: 146.83, start: 3.5, duration: 1.5 },    // D3
+            ];
+
+            // 和音（ファンタジー感）
+            const chords = [
+                { freq: 659.25, start: 0, duration: 1.0 },      // E5
+                { freq: 783.99, start: 1.0, duration: 1.0 },    // G5
+                { freq: 523.25, start: 2.5, duration: 1.5 },    // C5
+                { freq: 587.33, start: 4.0, duration: 1.0 },    // D5
             ];
 
             const now = audioContext.currentTime;
             
-            // メロディ再生
+            // メロディ再生（square waveで中世楽器風）
             melody.forEach(note => {
                 const osc = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
-                osc.type = 'sine'; // 優しい音色
+                osc.type = 'square'; // 中世楽器風の音色
                 osc.frequency.value = note.freq;
                 
                 gainNode.gain.setValueAtTime(0, now + note.start);
-                gainNode.gain.linearRampToValueAtTime(0.2, now + note.start + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0.15, now + note.start + 0.01);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
                 
                 osc.connect(gainNode);
@@ -1847,12 +1936,12 @@
                 const osc = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
-                osc.type = 'triangle'; // 柔らかい低音
+                osc.type = 'sawtooth'; // 重厚な低音
                 osc.frequency.value = note.freq;
                 
                 gainNode.gain.setValueAtTime(0, now + note.start);
-                gainNode.gain.linearRampToValueAtTime(0.1, now + note.start + 0.01);
-                gainNode.gain.exponentialRampToValueAtTime( 0.01, now + note.start + note.duration);
+                gainNode.gain.linearRampToValueAtTime(0.12, now + note.start + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
                 
                 osc.connect(gainNode);
                 gainNode.connect(bgmGainNode);
@@ -1863,12 +1952,33 @@
                 bgmOscillators.push(osc);
             });
 
-            // ループ再生（ゆったりとしたテンポ）
+            // 和音レイヤー（ファンタジー感を演出）
+            chords.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                osc.type = 'triangle'; // 柔らかい和音
+                osc.frequency.value = note.freq;
+                
+                gainNode.gain.setValueAtTime(0, now + note.start);
+                gainNode.gain.linearRampToValueAtTime(0.08, now + note.start + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.start + note.duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(bgmGainNode);
+                
+                osc.start(now + note.start);
+                osc.stop(now + note.start + note.duration);
+                
+                bgmOscillators.push(osc);
+            });
+
+            // ループ再生（RPGらしいテンポ）
             bgmTimeout = setTimeout(() => {
                 if (bgmOscillators.length > 0) {
                     playMenuBGM();
                 }
-            }, 3300);
+            }, 5000);
         }
         function playBGM() {
             initAudio();
@@ -2363,11 +2473,11 @@
 
         function getRank(score, total) {
             const percentage = (score / total) * 100;
-            if (percentage === 100) return '🏆 パーフェクト！';
-            if (percentage >= 80) return '🥇 素晴らしい！';
-            if (percentage >= 60) return '🥈 良くできました！';
-            if (percentage >= 40) return '🥉 もう少し！';
-            return '💪 頑張りましょう！';
+            if (percentage === 100) return '👑 伝説の勇者！';
+            if (percentage >= 80) return '⚔️ 王国の守護者！';
+            if (percentage >= 60) return '🛡️ 熟練の戦士！';
+            if (percentage >= 40) return '🗡️ 見習い冒険者！';
+            return '💪 修行中！';
         }
 
         // 進捗ドットを初期化
